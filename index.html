@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vishesh Narayan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #ffffff;
+      --white:   #ffffff;
+      --surf:    #f2f1ed;
+      --border:  #e0ddd5;
+      --text:    #17171a;
+      --muted:   #6a6762;
+      --accent:  #4338ca;
+      --acc2:    #6d64ee;
+      --green:   #15803d;
+      --amber:   #92400e;
+      --serif:   'Inter', -apple-system, sans-serif;
+      --sans:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono:    'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--sans); font-size: 15px; line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 52px; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px;
+    }
+    .nav-logo { font-family: var(--sans); font-size: 15px; font-weight: 500; color: var(--text); text-decoration: none; letter-spacing: -.01em; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: 11px;
+      letter-spacing: .1em; font-family: var(--mono); text-transform: uppercase;
+      transition: color .15s; padding-bottom: 2px; border-bottom: 1px solid transparent;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Layout ── */
+    .wrap { max-width: 780px; margin: 0 auto; padding: 0 36px; }
+    section { padding: 80px 0; }
+    .sec-label {
+      font-family: var(--mono); font-size: 10px; color: var(--accent);
+      letter-spacing: .2em; text-transform: uppercase; margin-bottom: 8px;
+    }
+    h2 { font-family: var(--sans); font-size: 26px; font-weight: 600; margin-bottom: 36px; letter-spacing: -.02em; }
+    hr.rule { border: none; border-top: 1px solid var(--border); }
+
+    /* ── Hero ── */
+    #hero { padding: 0; }
+    .hero-row { display: flex; align-items: flex-start; gap: 48px; padding: 100px 0 80px; }
+    .hero-left { display: flex; flex-direction: column; align-items: center; gap: 16px; flex-shrink: 0; }
+    .avatar-lg { width: 170px; height: 170px; border-radius: 50%; object-fit: cover; object-position: 50% 60%; }
+    .hero-icons { display: flex; gap: 14px; align-items: center; }
+    .hico { color: #9ca3af; text-decoration: none; transition: color .15s; }
+    .hico:hover { color: #374151; }
+    .hero-right { padding-top: 8px; }
+    .hero-name {
+      font-family: var(--sans); font-size: clamp(28px, 4vw, 40px);
+      font-weight: 500; margin-bottom: 16px;
+      letter-spacing: -.02em;
+    }
+    .hero-edu { font-size: 13px; color: var(--muted); margin-bottom: 14px; font-family: var(--mono); letter-spacing: .01em; }
+    .hero-bio { font-size: 15px; color: #374151; line-height: 1.8; max-width: 520px; }
+
+    /* ── Timeline / Experience ── */
+    .timeline {
+      position: relative;
+      padding-left: 32px;
+    }
+    /* The vertical spine — animates growing downward on scroll */
+    .timeline::before {
+      content: ''; position: absolute; left: 6px; top: 8px; bottom: 24px;
+      width: 1px; background: var(--border);
+      transform: scaleY(0); transform-origin: top;
+      transition: transform 1.2s cubic-bezier(.16,1,.3,1);
+    }
+    .timeline.revealed::before { transform: scaleY(1); }
+
+    .tl-entry {
+      position: relative; padding-bottom: 40px;
+      opacity: 0; transform: translateX(-12px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .tl-entry:last-child { padding-bottom: 0; }
+    .tl-entry.visible { opacity: 1; transform: translateX(0); }
+
+    /* Dot on the spine */
+    .tl-entry::before {
+      content: ''; position: absolute;
+      left: -29px; top: 7px;
+      width: 11px; height: 11px; border-radius: 50%;
+      background: var(--white); border: 2px solid var(--border);
+      transition: border-color .4s, background .4s, box-shadow .4s;
+      z-index: 1;
+    }
+    .tl-entry.visible::before {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(67,56,202,.12);
+    }
+    /* Active/current dot — filled accent */
+    .tl-entry.current::before { background: var(--accent); border-color: var(--accent); }
+
+    .tl-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 2px; gap: 12px;
+    }
+    .tl-co   { font-weight: 600; font-size: 14px; color: var(--text); }
+    .tl-date { font-family: var(--mono); font-size: 10px; color: var(--muted); white-space: nowrap; padding-top: 2px; }
+    .tl-role { font-size: 13px; font-weight: 500; color: var(--acc2); margin-bottom: 2px; }
+    .tl-loc  { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+    .tl-overview { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
+    ul.bl { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    ul.bl li {
+      font-size: 13.5px; color: var(--muted); padding-left: 16px;
+      position: relative; line-height: 1.6;
+    }
+    ul.bl li::before { content: '—'; position: absolute; left: 0; color: var(--border); }
+    ul.bl li em { color: var(--text); font-style: normal; font-weight: 500; }
+
+    /* ── Papers ── */
+    .paper {
+      border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px;
+      margin-bottom: 12px; background: var(--white);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .paper:hover { border-color: var(--acc2); box-shadow: 0 2px 12px rgba(67,56,202,.07); }
+    .badges { display: flex; gap: 6px; margin-bottom: 9px; }
+    .badge {
+      font-family: var(--mono); font-size: 9px; letter-spacing: .07em;
+      padding: 2px 8px; border-radius: 3px; text-transform: uppercase; font-weight: 500;
+    }
+    .bp { background:#ede9fe; color:#5b21b6; border:1px solid #ddd6fe; }
+    .br { background:#ede9fe; color:#5b21b6; border:1px solid #ddd6fe; }
+    .ptitle { font-size: 14px; font-weight: 600; line-height: 1.4; margin-bottom: 4px; }
+    .pauth  { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+    .pauth strong { color: var(--acc2); font-weight: 600; }
+    .pvenue { font-size: 11px; color: var(--muted); font-style: italic; }
+
+    /* ── Project cards ── */
+    .proj {
+      border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+      margin-bottom: 20px; background: var(--white);
+    }
+    .proj-head { padding: 20px 20px 0; }
+    .tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+    .tag {
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 3px; padding: 2px 7px; background: var(--bg);
+    }
+    .ptname { font-family: var(--mono); font-size: 14px; color: var(--accent); margin-bottom: 5px; font-weight: 500; }
+    .ptdesc { font-size: 13.5px; color: var(--muted); margin-bottom: 14px; line-height: 1.65; }
+    .ptdesc a { color: var(--accent); font-family: var(--mono); font-size: 11px; text-decoration: none; }
+    .ptdesc a:hover { text-decoration: underline; }
+    .ptdesc code { font-family: var(--mono); font-size: 11px; color: var(--acc2); }
+    .demo { background: var(--surf); border-top: 1px solid var(--border); padding: 18px 20px; }
+    .demo-lbl {
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+      letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px;
+    }
+
+    /* ── Shared button ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 13px; border: 1px solid var(--border); border-radius: 4px;
+      background: var(--white); color: var(--muted); font-family: var(--mono);
+      font-size: 11px; cursor: pointer; transition: border-color .15s, color .15s;
+    }
+    .btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .btn:disabled { opacity: .35; cursor: not-allowed; }
+
+    /* ── Speedup bars ── */
+    .sbars { display: flex; flex-direction: column; gap: 9px; }
+    .srow { display: flex; align-items: center; gap: 12px; }
+    .slabel { font-family: var(--mono); font-size: 11px; color: var(--muted); width: 140px; flex-shrink: 0; }
+    .strack { flex: 1; height: 24px; background: var(--bg); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+    .sfill {
+      height: 100%; border-radius: 3px; width: 0%;
+      transition: width 1.1s cubic-bezier(.23,1,.32,1);
+      display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;
+    }
+    .sval { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,.9); white-space: nowrap; }
+    .sbtns { margin-top: 12px; }
+
+    /* ── Scaling law canvas ── */
+    #sc-canvas { display: block; width: 100%; height: 270px; border-radius: 4px; }
+    .sc-status { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 8px; min-height: 16px; }
+
+    /* ── Autodiff ── */
+    #ad-svg { width: 100%; overflow: visible; }
+    .ad-btns { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+    .ad-status { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-left: 8px; }
+
+    /* ── Skills ── */
+    .sk-wrap { display: flex; flex-direction: column; gap: 14px; }
+    .sk-row { display: flex; align-items: flex-start; gap: 20px; }
+    .sk-cat { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; width: 72px; flex-shrink: 0; padding-top: 5px; }
+    .pills { display: flex; flex-wrap: wrap; gap: 7px; }
+    .pill {
+      background: var(--white); border: 1px solid var(--border); border-radius: 4px;
+      padding: 4px 11px; font-family: var(--mono); font-size: 12px; color: var(--text);
+      transition: border-color .15s, color .15s;
+    }
+    .pill:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Footer ── */
+    footer { border-top: 1px solid var(--border); padding: 40px 0; text-align: center; }
+    .flinks { display: flex; justify-content: center; gap: 22px; margin-bottom: 14px; }
+    .flinks a { color: var(--muted); text-decoration: none; font-family: var(--mono); font-size: 12px; transition: color .15s; }
+    .flinks a:hover { color: var(--accent); }
+    footer p { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+    @media (max-width: 640px) {
+      .exp-row { grid-template-columns: 1fr; gap: 4px; }
+      .nav-links { display: none; }
+      .wrap { padding: 0 20px; }
+      #hero { padding: 100px 0 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <a class="nav-logo" href="#hero">visheshng</a>
+  <ul class="nav-links">
+    <li><a href="#experience" data-s="experience">Experience</a></li>
+    <li><a href="#research"   data-s="research">Research</a></li>
+    <li><a href="#projects"   data-s="projects">Projects</a></li>
+    <li><a href="#skills"     data-s="skills">Skills</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="wrap">
+    <div class="hero-row">
+      <div class="hero-left">
+        <img class="avatar-lg" src="photo.png" alt="Vishesh Narayan">
+        <div class="hero-icons">
+          <a class="hico" href="mailto:visheshng24@gmail.com" title="Email">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </a>
+          <a class="hico" href="https://github.com/visheshnarayan" target="_blank" title="GitHub">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+          </a>
+          <a class="hico" href="https://linkedin.com/in/visheshng" target="_blank" title="LinkedIn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+          <a class="hico" href="https://x.com/visheshng" target="_blank" title="X">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.213 5.567 5.951-6.567zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="hero-right">
+        <h1 class="hero-name">visheshng</h1>
+        <p class="hero-edu">B.S. Computer Science &amp; Mathematics · University of Maryland · 2027</p>
+        <p class="hero-bio">
+          ML engineer and robotics researcher. Building systems that learn and move.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!--Experience -->
+<section id="experience">
+  <div class="wrap">
+    <div class="sec-label">Experience</div>
+    <h2>Where I've worked</h2>
+    <div class="timeline" id="timeline">
+
+      <div class="tl-entry current">
+        <div class="tl-head">
+          <div class="tl-co">Amazon Lab126</div>
+          <div class="tl-date">2026 – Present</div>
+        </div>
+        <div class="tl-role">ML Engineer Intern · Sunnyvale, CA</div>
+        <p class="tl-overview">ML and physics R&D for physical AI models and robotic systems in Lab126's frontier prototyping lab.</p>
+      </div>
+
+      <div class="tl-entry current">
+        <div class="tl-head">
+          <div class="tl-co">MIND Lab, University of Maryland</div>
+          <div class="tl-date">2021 – Present</div>
+        </div>
+        <div class="tl-role">Machine Learning Researcher · College Park, MD</div>
+        <p class="tl-overview">Research on multi-agent systems, agentic protocols, knowledge graph construction, and semantic embedding spaces under Prof. Agrawala.</p>
+      </div>
+
+      <div class="tl-entry current">
+        <div class="tl-head">
+          <div class="tl-co">Apex Fund</div>
+          <div class="tl-date">2023 – Present</div>
+        </div>
+        <div class="tl-role">Quantitative Analyst · College Park, MD</div>
+        <p class="tl-overview">Leading 35 quants across equities, options, macro, alt data, and stat arb pods on a live portfolio.</p>
+      </div>
+
+      <div class="tl-entry">
+        <div class="tl-head">
+          <div class="tl-co">ExploreDigits</div>
+          <div class="tl-date">2023 – 2025</div>
+        </div>
+        <div class="tl-role">Software Engineer Intern · Gaithersburg, MD</div>
+        <p class="tl-overview">Built AI tooling to interface private healthcare data with LLM-powered analytics, enabling natural language queries over protected Medicare/Medicaid datasets.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!--Research -->
+<section id="research">
+  <div class="wrap">
+    <div class="sec-label">Research</div>
+    <h2>Publications</h2>
+    <div class="paper">
+      <div class="badges"><span class="badge br">Preprint</span></div>
+      <div class="ptitle">Reliability Must Be a Protocol-Level Requirement of the Agentic Web</div>
+      <div class="pauth"><strong>Narayan, V.</strong>, Wajid, F., and Agrawala, A.</div>
+      <div class="pvenue">Manuscript in preparation</div>
+    </div>
+    <div class="paper">
+      <div class="badges"><span class="badge br">Preprint</span></div>
+      <div class="ptitle">From Extraction to Governed Memory: Multi-Agent Knowledge Graph Construction with Domain-Expert Review</div>
+      <div class="pauth">Bykampadi, P. N., Mokaria, N., <strong>Narayan, V.</strong>, Wajid, F., and Agrawala, A.</div>
+      <div class="pvenue">Manuscript in preparation</div>
+    </div>
+    <div class="paper">
+      <div class="badges"><span class="badge bp">EAI PervasiveHealth 2024</span></div>
+      <div class="ptitle">Temporal Analysis on Topics Using Word2Vec: Insights from Health and Sports News</div>
+      <div class="pauth">Sandhu, A., <strong>Narayan, V.</strong>, Wajid, F., and Agrawala, A.</div>
+      <div class="pvenue">EAI Endorsed Transactions on Pervasive Health and Technology · Heraklion, Greece · Sep 2024 · DOI: 10.1007/978-3-031-85572-6_19</div>
+    </div>
+  </div>
+</section>
+
+
+<!--Projects -->
+<section id="projects">
+  <div class="wrap">
+    <div class="sec-label">Projects</div>
+    <h2>Recently building</h2>
+
+    <!-- rl2xla -->
+    <div class="proj">
+      <div class="proj-head">
+        <div class="tags"><span class="tag">JAX/XLA</span><span class="tag">Compilers</span><span class="tag">RL</span><span class="tag">AST transforms</span></div>
+        <div class="ptname">rl2xla — Gymnasium-to-XLA RL Compiler</div>
+        <div class="ptdesc">
+          9-transformer AST pipeline converting NumPy Gymnasium environments to vmap/scan-safe JAX.
+          Three compiled <code>lax.scan</code> PPO kernels eliminate Python overhead — 28.9× faster on A100.<br><br>
+          <a href="https://github.com/visheshnarayan/rl2xla" target="_blank">→ github.com/visheshnarayan/rl2xla</a>
+        </div>
+      </div>
+      <div class="demo">
+        <div class="demo-lbl">// speedup vs. NumPy baseline</div>
+        <div class="sbars" id="sbars">
+          <div class="srow"><div class="slabel">NumPy (baseline)</div><div class="strack"><div class="sfill" id="sb0" data-w="3.46" style="background:#9ca3af"><span class="sval">1.0×</span></div></div></div>
+          <div class="srow"><div class="slabel">JAX eager</div><div class="strack"><div class="sfill" id="sb1" data-w="10.38" style="background:linear-gradient(90deg,#818cf8,#6366f1)"><span class="sval">~3×</span></div></div></div>
+          <div class="srow"><div class="slabel">rl2xla (CPU)</div><div class="strack"><div class="sfill" id="sb2" data-w="76.12" style="background:linear-gradient(90deg,#6366f1,#4338ca)"><span class="sval">22×</span></div></div></div>
+          <div class="srow"><div class="slabel">rl2xla (A100)</div><div class="strack"><div class="sfill" id="sb3" data-w="100" style="background:linear-gradient(90deg,#4338ca,#312e81)"><span class="sval">28.9×</span></div></div></div>
+        </div>
+        <div class="sbtns">
+          <button class="btn" id="sp-btn" onclick="toggleSpeedup()">▶ run benchmark</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chinchilla -->
+    <div class="proj">
+      <div class="proj-head">
+        <div class="tags"><span class="tag">JAX</span><span class="tag">Transformers</span><span class="tag">Scaling Laws</span><span class="tag">Multi-GPU</span></div>
+        <div class="ptname">JAX Scaling Laws — Chinchilla Explorer</div>
+        <div class="ptdesc">
+          Trained 1M–150M parameter transformers across a 4-GPU DP×TP mesh — all-gather sharded weights
+          on the forward pass, all-reduce gradients on the backward pass. Fit Chinchilla-style
+          compute-optimal scaling laws from the resulting checkpoints.<br><br>
+          <a href="https://github.com/visheshnarayan/jax-scaling-laws" target="_blank">→ github.com/visheshnarayan/jax-scaling-laws</a>
+        </div>
+      </div>
+      <div class="demo">
+        <div class="demo-lbl">// trains 8 checkpoints → extracts (C, N) → recovers scaling law</div>
+        <canvas id="sc-canvas"></canvas>
+        <div class="sc-status" id="sc-status">scroll into view to begin…</div>
+      </div>
+    </div>
+
+    <!-- Autodiff -->
+    <div class="proj">
+      <div class="proj-head">
+        <div class="tags"><span class="tag">Python</span><span class="tag">Autodiff</span><span class="tag">JIT Compiler</span><span class="tag">Reverse-mode</span></div>
+        <div class="ptname">micrograd-jit — Autodifferentiation JIT Compiler</div>
+        <div class="ptdesc">
+          Reverse-mode autodiff engine with tracing JIT compiler. Records operations into a computation
+          graph, compiles a fused backward kernel — 6–8× faster than eager. Verified against
+          <code>torch.autograd</code> on 12+ ops.<br><br>
+          <a href="https://github.com/visheshnarayan/micrograd-jit" target="_blank">→ github.com/visheshnarayan/micrograd-jit</a>
+        </div>
+      </div>
+      <div class="demo">
+        <div class="demo-lbl">// f(x,y,c) = (x+y)×c · x=1, y=2, c=4</div>
+        <svg id="ad-svg" viewBox="0 0 680 210" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="ad-btns">
+          <button class="btn" onclick="adReplay()">↺ replay</button>
+          <span class="ad-status" id="ad-status"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!--Skills -->
+<section id="skills">
+  <div class="wrap">
+    <div class="sec-label">Skills</div>
+    <h2>Technical stack</h2>
+    <div class="sk-wrap">
+      <div class="sk-row"><div class="sk-cat">Languages</div><div class="pills"><span class="pill">Python</span><span class="pill">C++</span><span class="pill">Java</span><span class="pill">SQL</span><span class="pill">OCaml</span></div></div>
+      <div class="sk-row"><div class="sk-cat">ML / DL</div><div class="pills"><span class="pill">JAX</span><span class="pill">PyTorch</span><span class="pill">CUDA</span><span class="pill">NumPy</span><span class="pill">FSDP</span><span class="pill">XLA</span></div></div>
+      <div class="sk-row"><div class="sk-cat">Systems</div><div class="pills"><span class="pill">Kubernetes</span><span class="pill">Linux</span><span class="pill">Kafka</span><span class="pill">Git</span></div></div>
+      <div class="sk-row"><div class="sk-cat">Cloud</div><div class="pills"><span class="pill">AWS S3</span><span class="pill">Lambda</span><span class="pill">EC2</span></div></div>
+    </div>
+  </div>
+</section>
+
+
+<!--Education -->
+<!-- Footer -->
+<footer>
+  <div class="wrap">
+    <div class="flinks">
+      <a href="mailto:visheshng24@gmail.com">visheshng24@gmail.com</a>
+      <a href="https://github.com/visheshnarayan" target="_blank">GitHub</a>
+      <a href="https://linkedin.com/in/visheshng" target="_blank">LinkedIn</a>
+      <a href="https://x.com/visheshng" target="_blank">X</a>
+    </div>
+    <p>© 2026 Vishesh Narayan · University of Maryland</p>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════
+//  Nav active section tracking
+// ══════════════════════════════════════════════════
+const SECS = ['hero','experience','research','projects','skills'];
+const navAs = document.querySelectorAll('.nav-links a[data-s]');
+function updateNav() {
+  const mid = window.scrollY + window.innerHeight * 0.38;
+  let cur = SECS[0];
+  for (const id of SECS) { const el = document.getElementById(id); if (el && el.offsetTop <= mid) cur = id; }
+  navAs.forEach(a => a.classList.toggle('active', a.dataset.s === cur));
+}
+window.addEventListener('scroll', updateNav, { passive: true });
+
+// ══════════════════════════════════════════════════
+//  Widget 1 — Speedup bars (auto-animate on scroll)
+// ══════════════════════════════════════════════════
+let spDone = false;
+function toggleSpeedup() {
+  const fills = document.querySelectorAll('.sfill');
+  spDone = !spDone;
+  fills.forEach(f => { f.style.width = spDone ? f.dataset.w + '%' : '0%'; });
+  document.getElementById('sp-btn').textContent = spDone ? '↺ reset' : '▶ run benchmark';
+}
+new IntersectionObserver(e => { if (e[0].isIntersecting && !spDone) setTimeout(toggleSpeedup, 300); }, { threshold: 0.5 })
+  .observe(document.getElementById('sbars'));
+
+// ══════════════════════════════════════════════════
+//  Widget 2 — Chinchilla: train → extract → recover
+// ══════════════════════════════════════════════════
+const SC   = document.getElementById('sc-canvas');
+const sctx = SC.getContext('2d');
+
+// Axis bounds
+const FULL = { cl:16, ch:24.5, nl:5.5, nh:12  };
+const ZOOM = { cl:13.0,ch:19.5, nl:5.6, nh:9.3 };
+
+// Big reference models (visible in full view to give context)
+const BIG_M = [
+  { l:'GPT-3 (175B)',     cl:23.50, nl:11.24 }, // above frontier = undertrained
+  { l:'Chinchilla (70B)', cl:23.77, nl:10.85 }, // on the frontier
+];
+
+// Our trained model family (all at Chinchilla-optimal N for their compute)
+const MY_M = [
+  {l:'1M',N:1e6},{l:'5M',N:5e6},{l:'10M',N:10e6},{l:'30M',N:30e6},
+  {l:'70M',N:70e6},{l:'100M',N:100e6},{l:'130M',N:130e6},{l:'150M',N:150e6},
+].map(m=>({ ...m, cl:Math.log10((m.N/0.086)**2), nl:Math.log10(m.N) }));
+
+// Simulated final training losses (larger model → lower loss)
+const L0    = 5.2;
+const L_MIN = [4.18,3.62,3.32,2.92,2.60,2.46,2.38,2.32];
+
+// Animation phases (frame numbers at ~60fps)
+const F = { TRAIN:150, FRONTIER:220, LABELS:248, ZOOM:330, DOTS:378, REG:450, DONE:485 };
+let scFrame=0, scStarted=false, scAnimId=null;
+
+const ease = t => t<.5?2*t*t:1-(-2*t+2)**2/2;
+const lerp = (a,b,t) => a+(b-a)*t;
+const clamp01 = t => Math.max(0,Math.min(1,t));
+const prog = (f,a,b) => clamp01((f-a)/(b-a));
+
+// Green gradient for 8 training curves
+const TRAIN_COLORS=['#86efac','#4ade80','#22c55e','#16a34a','#15803d','#166534','#14532d','#052e16'];
+
+function scStep() {
+  const dpr=window.devicePixelRatio||1;
+  const TW=SC.width/dpr, TH=SC.height/dpr;
+
+  // Three-panel layout: scaling law | GPU cluster | loss curves
+  const S1=Math.round(TW*0.40);
+  const S2=Math.round(TW*0.64);
+  const lp={t:22,r:6,b:34,l:40};
+  const lpw=S1-lp.l-lp.r, lph=TH-lp.t-lp.b;
+  const mp={t:22,r:6,b:34,l:14};
+  const mx0=S1+4+mp.l, my0=mp.t;
+  const mpw=(S2-S1-4)-mp.l-mp.r, mph=TH-mp.t-mp.b;
+  const rp={t:22,r:10,b:34,l:18};
+  const rx0=S2+4+rp.l, ry0=rp.t;
+  const rpw=(TW-S2-4)-rp.l-rp.r, rph=TH-rp.t-rp.b;
+
+  sctx.clearRect(0,0,TW,TH);
+  sctx.fillStyle='#f2f1ed'; sctx.fillRect(0,0,TW,TH);
+  sctx.fillStyle='#e0ddd5';
+  sctx.fillRect(S1,0,2,TH);
+  sctx.fillRect(S2,0,2,TH);
+
+  // ── MIDDLE PANEL: GPU cluster (permanent, never fades) ──
+  sctx.save(); sctx.beginPath(); sctx.rect(S1+4,0,S2-S1-4,TH); sctx.clip();
+
+  sctx.fillStyle='#9ca3af'; sctx.font='bold 7px JetBrains Mono,monospace';
+  sctx.textAlign='left'; sctx.fillText('DIST TRAINING',mx0,my0-5);
+
+  const gcx=mx0+mpw/2, gcy=my0+mph/2+4;
+  const BW=36,BH=22;
+  const G=[{x:gcx-30,y:gcy-28},{x:gcx+30,y:gcy-28},{x:gcx-30,y:gcy+28},{x:gcx+30,y:gcy+28}];
+  const GLBL=['GPU 0','GPU 1','GPU 2','GPU 3'];
+
+  const gpuAppear=clamp01(scFrame/10);
+  const agA=clamp01((scFrame-10)/25);   // all-gather fades in, stays
+  const arA=clamp01((scFrame-80)/25);   // all-reduce fades in, stays
+  // Freeze dash when training done so arrows stay but stop moving
+  const dashOff=scFrame<F.TRAIN ? -scFrame*0.8 : -(F.TRAIN*0.8);
+
+  // Axis labels
+  sctx.fillStyle='#c0bcb5'; sctx.font='7px JetBrains Mono,monospace'; sctx.textAlign='center';
+  sctx.fillText('← TP →',gcx,gcy-28-BH/2-14);
+  sctx.save(); sctx.translate(S1+11,gcy); sctx.rotate(-Math.PI/2);
+  sctx.fillStyle='#c0bcb5'; sctx.textAlign='center'; sctx.fillText('DP',0,0); sctx.restore();
+
+  // All-Gather arrows (horizontal, indigo) — stays visible
+  if(agA>0.01){
+    const ax0=G[0].x+BW/2+2, ax1=G[1].x-BW/2-2;
+    sctx.globalAlpha=agA;
+    sctx.strokeStyle='#4338ca'; sctx.lineWidth=1.3;
+    sctx.setLineDash([3,3]);
+    sctx.lineDashOffset=dashOff;
+    sctx.beginPath(); sctx.moveTo(ax0,G[0].y-2); sctx.lineTo(ax1,G[0].y-2); sctx.stroke();
+    sctx.lineDashOffset=-dashOff;
+    sctx.beginPath(); sctx.moveTo(ax1,G[0].y+2); sctx.lineTo(ax0,G[0].y+2); sctx.stroke();
+    sctx.lineDashOffset=dashOff;
+    sctx.beginPath(); sctx.moveTo(ax0,G[2].y-2); sctx.lineTo(ax1,G[2].y-2); sctx.stroke();
+    sctx.lineDashOffset=-dashOff;
+    sctx.beginPath(); sctx.moveTo(ax1,G[2].y+2); sctx.lineTo(ax0,G[2].y+2); sctx.stroke();
+    sctx.setLineDash([]);
+    sctx.fillStyle='#4338ca'; sctx.font='bold 7px JetBrains Mono,monospace'; sctx.textAlign='center';
+    sctx.fillText('all-gather',gcx,gcy-28-BH/2-5);
+    sctx.globalAlpha=1;
+  }
+
+  // All-Reduce arrows (vertical, amber) — stays visible
+  if(arA>0.01){
+    const vy0=G[0].y+BH/2+2, vy1=G[2].y-BH/2-2;
+    sctx.globalAlpha=arA;
+    sctx.strokeStyle='#b45309'; sctx.lineWidth=1.3;
+    sctx.setLineDash([3,3]);
+    sctx.lineDashOffset=dashOff;
+    sctx.beginPath(); sctx.moveTo(G[0].x-2,vy0); sctx.lineTo(G[0].x-2,vy1); sctx.stroke();
+    sctx.lineDashOffset=-dashOff;
+    sctx.beginPath(); sctx.moveTo(G[0].x+2,vy1); sctx.lineTo(G[0].x+2,vy0); sctx.stroke();
+    sctx.lineDashOffset=dashOff;
+    sctx.beginPath(); sctx.moveTo(G[1].x-2,vy0); sctx.lineTo(G[1].x-2,vy1); sctx.stroke();
+    sctx.lineDashOffset=-dashOff;
+    sctx.beginPath(); sctx.moveTo(G[1].x+2,vy1); sctx.lineTo(G[1].x+2,vy0); sctx.stroke();
+    sctx.setLineDash([]);
+    sctx.fillStyle='#b45309'; sctx.font='bold 7px JetBrains Mono,monospace'; sctx.textAlign='center';
+    sctx.fillText('all-reduce ∇',gcx,gcy+28+BH/2+11);
+    sctx.globalAlpha=1;
+  }
+
+  // GPU boxes on top of arrows
+  sctx.globalAlpha=gpuAppear;
+  G.forEach((g,i)=>{
+    sctx.fillStyle=arA>0.3?'#fffbeb':agA>0.3?'#eef2ff':'#f9f9f7';
+    sctx.strokeStyle=arA>0.3?'#b45309':agA>0.3?'#4338ca':'#d4d4d8';
+    sctx.lineWidth=1.3;
+    sctx.beginPath(); sctx.roundRect(g.x-BW/2,g.y-BH/2,BW,BH,3);
+    sctx.fill(); sctx.stroke();
+    sctx.fillStyle=arA>0.3?'#92400e':agA>0.3?'#4338ca':'#52525b';
+    sctx.font='bold 7px JetBrains Mono,monospace'; sctx.textAlign='center';
+    sctx.fillText(GLBL[i],g.x,g.y+2.5);
+  });
+  sctx.globalAlpha=1;
+  sctx.restore();
+
+  // ── RIGHT PANEL: Training loss curves (fade in, permanent) ─
+  sctx.save(); sctx.beginPath(); sctx.rect(S2+4,0,TW-S2-4,TH); sctx.clip();
+
+  const L_LO=2.0, L_HI=5.5;
+  const tx=s=>rx0+(s/1000)*rpw;
+  const ty=l=>ry0+rph-(l-L_LO)/(L_HI-L_LO)*rph;
+  const lossA=clamp01((scFrame-(F.TRAIN-20))/30);
+
+  if(lossA>0.01){
+    sctx.globalAlpha=lossA;
+    sctx.strokeStyle='#e0ddd5'; sctx.lineWidth=1;
+    [3,4,5].forEach(l=>{
+      const y=ty(l); sctx.beginPath(); sctx.moveTo(rx0,y); sctx.lineTo(rx0+rpw,y); sctx.stroke();
+      sctx.fillStyle='#a8a49e'; sctx.font='8px JetBrains Mono,monospace';
+      sctx.textAlign='right'; sctx.fillText(l+'',rx0-3,y+3);
+    });
+    sctx.fillStyle='#a8a49e'; sctx.font='9px JetBrains Mono,monospace';
+    sctx.textAlign='center'; sctx.fillText('Training steps',rx0+rpw/2,TH-2);
+    sctx.fillStyle='#9ca3af'; sctx.font='bold 8px JetBrains Mono,monospace';
+    sctx.textAlign='left'; sctx.fillText('LOSS CURVES',rx0,ry0-5);
+    sctx.fillStyle='#a8a49e'; sctx.font='8px JetBrains Mono,monospace';
+    sctx.textAlign='right'; sctx.fillText('loss',rx0-3,ry0);
+    MY_M.forEach((m,i)=>{
+      sctx.beginPath(); sctx.strokeStyle=TRAIN_COLORS[i]; sctx.lineWidth=1.5;
+      let first=true;
+      for(let s=0;s<=1000;s+=8){
+        const loss=L_MIN[i]+(L0-L_MIN[i])*Math.exp(-5*s/1000);
+        const x=tx(s),y=ty(loss);
+        if(y<ry0-2||y>ry0+rph+2){first=true;continue;}
+        first?(sctx.moveTo(x,y),first=false):sctx.lineTo(x,y);
+      }
+      sctx.stroke();
+    });
+    MY_M.forEach((m,i)=>{
+      const endL=L_MIN[i]+(L0-L_MIN[i])*Math.exp(-5);
+      const ey=ty(endL);
+      if(ey<ry0||ey>ry0+rph)return;
+      sctx.beginPath(); sctx.arc(rx0+rpw,ey,3,0,Math.PI*2);
+      sctx.fillStyle=TRAIN_COLORS[i]; sctx.fill();
+      sctx.fillStyle=TRAIN_COLORS[i]; sctx.font='7px JetBrains Mono,monospace';
+      sctx.textAlign='right'; sctx.fillText(m.l,rx0+rpw-5,ey-3);
+    });
+    if(scFrame>F.TRAIN){
+      const a=clamp01((scFrame-F.TRAIN)/30);
+      sctx.globalAlpha=lossA*a*0.6;
+      sctx.strokeStyle='#92400e'; sctx.lineWidth=0.8; sctx.setLineDash([2,3]);
+      MY_M.forEach((m,i)=>{
+        const endL=L_MIN[i]+(L0-L_MIN[i])*Math.exp(-5);
+        const ey=ty(endL); if(ey<ry0||ey>ry0+rph)return;
+        sctx.beginPath(); sctx.moveTo(rx0,ey); sctx.lineTo(rx0+rpw,ey); sctx.stroke();
+      });
+      sctx.setLineDash([]);
+    }
+    sctx.globalAlpha=1;
+  }
+  sctx.restore();
+
+  // ── LEFT PANEL: Chinchilla scaling law ─────────────────
+  sctx.save(); sctx.beginPath(); sctx.rect(0,0,S1,TH); sctx.clip();
+
+  // Interpolate axis bounds for zoom
+  let ax;
+  if(scFrame<=F.LABELS){ ax={...FULL}; }
+  else if(scFrame<=F.ZOOM){
+    const t=ease(prog(scFrame,F.LABELS,F.ZOOM));
+    ax={ cl:lerp(FULL.cl,ZOOM.cl,t), ch:lerp(FULL.ch,ZOOM.ch,t),
+         nl:lerp(FULL.nl,ZOOM.nl,t), nh:lerp(FULL.nh,ZOOM.nh,t) };
+  } else { ax={...ZOOM}; }
+
+  const cx=c=>lp.l+(c-ax.cl)/(ax.ch-ax.cl)*lpw;
+  const ny=n=>lp.t+lph-(n-ax.nl)/(ax.nh-ax.nl)*lph;
+  const inB=(c,n)=>c>=ax.cl-0.3&&c<=ax.ch+0.3&&n>=ax.nl-0.3&&n<=ax.nh+0.3;
+
+  // Grid left
+  const cSt=(ax.ch-ax.cl)>7?2:1, nSt=(ax.nh-ax.nl)>5?2:1;
+  sctx.strokeStyle='#e0ddd5'; sctx.lineWidth=1;
+  for(let c=Math.ceil(ax.cl);c<=Math.floor(ax.ch);c+=cSt){
+    const x=cx(c); if(x<lp.l-2||x>lp.l+lpw+2)continue;
+    sctx.beginPath(); sctx.moveTo(x,lp.t); sctx.lineTo(x,lp.t+lph); sctx.stroke();
+    sctx.fillStyle='#a8a49e'; sctx.font='8px JetBrains Mono,monospace';
+    sctx.textAlign='center'; sctx.fillText('10^'+c,x,lp.t+lph+13);
+  }
+  for(let n=Math.ceil(ax.nl);n<=Math.floor(ax.nh);n+=nSt){
+    const y=ny(n); if(y<lp.t-2||y>lp.t+lph+2)continue;
+    sctx.beginPath(); sctx.moveTo(lp.l,y); sctx.lineTo(lp.l+lpw,y); sctx.stroke();
+    sctx.fillStyle='#a8a49e'; sctx.font='8px JetBrains Mono,monospace';
+    sctx.textAlign='right'; sctx.fillText('10^'+n,lp.l-3,y+3);
+  }
+  sctx.fillStyle='#a8a49e'; sctx.font='9px JetBrains Mono,monospace';
+  sctx.textAlign='center'; sctx.fillText('Compute C (FLOPs)',lp.l+lpw/2,TH-2);
+  sctx.save(); sctx.translate(11,lp.t+lph/2); sctx.rotate(-Math.PI/2);
+  sctx.fillText('Params N',0,0); sctx.restore();
+  sctx.fillStyle='#9ca3af'; sctx.font='bold 8px JetBrains Mono,monospace';
+  sctx.textAlign='left'; sctx.fillText('SCALING LAW',lp.l,lp.t-5);
+
+  // Frontier line (draws after training, F.TRAIN → F.FRONTIER)
+  if(scFrame>F.TRAIN){
+    const fp=prog(scFrame,F.TRAIN,F.FRONTIER);
+    const drawTo=ax.cl+fp*(ax.ch-ax.cl);
+    sctx.beginPath(); sctx.strokeStyle='#4338ca'; sctx.lineWidth=2;
+    let first=true;
+    for(let c=ax.cl;c<=Math.min(ax.ch,drawTo);c+=0.03){
+      const n=Math.log10(0.086*Math.sqrt(10**c));
+      const x=cx(c),y=ny(n);
+      if(n<ax.nl-0.5||n>ax.nh+0.5||x>lp.l+lpw+3){first=true;break;}
+      first?(sctx.moveTo(x,y),first=false):sctx.lineTo(x,y);
+    }
+    sctx.stroke();
+    // Frontier label
+    if(fp>0.75){
+      const a=clamp01((fp-0.75)/0.25);
+      sctx.globalAlpha=a;
+      const lc=ax.cl+0.6*(ax.ch-ax.cl);
+      const ln=Math.log10(0.086*Math.sqrt(10**lc));
+      if(inB(lc,ln)){ sctx.fillStyle='#4338ca'; sctx.font='9px JetBrains Mono,monospace';
+        sctx.textAlign='right'; sctx.fillText('N∝C^0.5 (Chinchilla)',cx(lc)-4,ny(ln)-6); }
+      sctx.globalAlpha=1;
+    }
+  }
+
+  // Big reference model dots (full-view phase only, fade out on zoom)
+  if(scFrame>F.FRONTIER){
+    const aIn =clamp01((scFrame-F.FRONTIER)/(F.LABELS-F.FRONTIER));
+    const aOut=scFrame>F.LABELS?clamp01(1-prog(scFrame,F.LABELS,F.LABELS+35)):1;
+    sctx.globalAlpha=aIn*aOut;
+    BIG_M.forEach(m=>{
+      if(!inB(m.cl,m.nl))return;
+      const x=cx(m.cl),y=ny(m.nl);
+      sctx.beginPath(); sctx.arc(x,y,4.5,0,Math.PI*2);
+      sctx.fillStyle='#6366f1'; sctx.fill();
+      sctx.strokeStyle='white'; sctx.lineWidth=1.5; sctx.stroke();
+      sctx.fillStyle='#4338ca'; sctx.font='8px JetBrains Mono,monospace';
+      sctx.textAlign='left'; sctx.fillText(m.l,x+7,y+3);
+    });
+    sctx.globalAlpha=1;
+  }
+
+  // Our model dots (appear after zoom, one by one)
+  if(scFrame>F.ZOOM){
+    const nShow=prog(scFrame,F.ZOOM,F.DOTS)*MY_M.length;
+    MY_M.forEach((m,i)=>{
+      if(i>=nShow)return;
+      if(!inB(m.cl,m.nl))return;
+      const x=cx(m.cl),y=ny(m.nl);
+      if(x<lp.l-8||x>lp.l+lpw+8||y<lp.t-8||y>lp.t+lph+8)return;
+      const partial=clamp01(nShow-i);
+      sctx.globalAlpha=clamp01(partial*3);
+      const r=4*clamp01(partial*3);
+      sctx.beginPath(); sctx.arc(x,y,r,0,Math.PI*2);
+      sctx.fillStyle='#15803d'; sctx.fill();
+      sctx.strokeStyle='white'; sctx.lineWidth=1.5; sctx.stroke();
+      if(r>2.5){ sctx.fillStyle='#15803d'; sctx.font='7px JetBrains Mono,monospace';
+        sctx.textAlign='center'; sctx.fillText(m.l,x,y-7); }
+      sctx.globalAlpha=1;
+    });
+  }
+
+  // Fitted regression line (amber dashed, after dots)
+  if(scFrame>F.DOTS){
+    const rp_=prog(scFrame,F.DOTS,F.REG);
+    const regTo=ax.cl+rp_*(ax.ch-ax.cl);
+    sctx.beginPath(); sctx.strokeStyle='#92400e'; sctx.lineWidth=2;
+    sctx.setLineDash([5,3]);
+    let first=true;
+    for(let c=ax.cl;c<=regTo;c+=0.03){
+      const n=Math.log10(0.086*Math.sqrt(10**c));
+      if(n<ax.nl||n>ax.nh)continue;
+      const x=cx(c),y=ny(n);
+      if(x>lp.l+lpw+3)break;
+      first?(sctx.moveTo(x,y),first=false):sctx.lineTo(x,y);
+    }
+    sctx.stroke(); sctx.setLineDash([]);
+    if(rp_>0.6){
+      const a=clamp01((rp_-0.6)/0.4); sctx.globalAlpha=a;
+      const lc=ax.cl+0.4*(ax.ch-ax.cl);
+      const ln=Math.log10(0.086*Math.sqrt(10**lc));
+      if(inB(lc,ln)){
+        sctx.fillStyle='#92400e'; sctx.font='9px JetBrains Mono,monospace';
+        sctx.textAlign='left';
+        sctx.fillText('fit: N = 0.086·C^0.50',cx(lc)+4,ny(ln)+14);
+      }
+      sctx.globalAlpha=1;
+    }
+  }
+  sctx.restore();
+
+  // Status text
+  const st=document.getElementById('sc-status');
+  if(scFrame<12)              st.textContent='initializing 4-GPU cluster — DP×TP mesh';
+  else if(scFrame<80)         st.textContent='forward pass — all-gather sharded weights across tensor-parallel axis';
+  else if(scFrame<F.TRAIN-20) st.textContent='backward pass — all-reduce gradients across data-parallel axis';
+  else if(scFrame<=F.TRAIN)   st.textContent='extracting (C, N) from trained checkpoints…';
+  else if(scFrame<=F.FRONTIER) st.textContent='drawing Chinchilla compute-optimal frontier…';
+  else if(scFrame<=F.ZOOM)    st.textContent='zooming into our training regime…';
+  else if(scFrame<=F.DOTS)    st.textContent='plotting (C, N_opt) from each checkpoint…';
+  else if(scFrame<=F.REG)     st.textContent='fitting power law through model family…';
+  else                         st.textContent='recovered N_opt = 0.086 · C^0.50 — matches Chinchilla prediction';
+
+  if(scFrame<F.DONE){ scFrame+=0.4; scAnimId=requestAnimationFrame(scStep); }
+}
+
+function resizeSC() {
+  const dpr=window.devicePixelRatio||1;
+  const rect=SC.parentElement.getBoundingClientRect();
+  SC.width=rect.width*dpr; SC.height=270*dpr;
+  SC.style.width=rect.width+'px'; SC.style.height='270px';
+  sctx.setTransform(1,0,0,1,0,0); sctx.scale(dpr,dpr);
+  if(scStarted) scStep(); // redraw current frame statically
+}
+
+new IntersectionObserver(([e])=>{
+  if(e.isIntersecting&&!scStarted){
+    scStarted=true; scFrame=0; scAnimId=requestAnimationFrame(scStep);
+  }
+},{threshold:0.25}).observe(SC.parentElement);
+
+// ══════════════════════════════════════════════════
+//  Widget 3 — Autodiff (play-once, scroll-triggered)
+// ══════════════════════════════════════════════════
+const NS='http://www.w3.org/2000/svg';
+const adSvg=document.getElementById('ad-svg');
+
+const NODES=[
+  {id:'x', lbl:'x',   val:'1',  grad:'4', x:75,  y:88 },
+  {id:'y', lbl:'y',   val:'2',  grad:'4', x:75,  y:162},
+  {id:'c', lbl:'c',   val:'4',  grad:'3', x:415, y:162},
+  {id:'s', lbl:'x+y', val:'3',  grad:'4', x:255, y:125},
+  {id:'f', lbl:'f',   val:'12', grad:'1', x:560, y:125},
+];
+const EDGES=[
+  {f:'x', t:'s', fl:'+',    bl:'∂s/∂x=1'},
+  {f:'y', t:'s', fl:'+',    bl:'∂s/∂y=1'},
+  {f:'s', t:'f', fl:'×c=4', bl:'∂f/∂s=4'},
+  {f:'c', t:'f', fl:'×s=3', bl:'∂f/∂c=3'},
+];
+
+let adState={fwdEdges:new Set(),bwdEdges:new Set(),vals:{},grads:{},glow:new Set()};
+let adTriggered=false;
+
+function adN(id){return NODES.find(n=>n.id===id);}
+function eKey(f,t){return f+'→'+t;}
+
+function drawAd(){
+  adSvg.innerHTML='';
+  const defs=document.createElementNS(NS,'defs');
+  [['fwd','#4338ca'],['bwd','#b45309']].forEach(([nm,col])=>{
+    const mk=document.createElementNS(NS,'marker');
+    mk.setAttribute('id','mk-ad-'+nm); mk.setAttribute('markerWidth','7');
+    mk.setAttribute('markerHeight','7'); mk.setAttribute('refX','5.5');
+    mk.setAttribute('refY','3'); mk.setAttribute('orient','auto');
+    const pp=document.createElementNS(NS,'path');
+    pp.setAttribute('d','M0,0 L0,6 L7,3 z'); pp.setAttribute('fill',col);
+    mk.appendChild(pp); defs.appendChild(mk);
+  });
+  const sty=document.createElementNS(NS,'style');
+  sty.textContent='@keyframes ff{to{stroke-dashoffset:-16}}@keyframes fb{to{stroke-dashoffset:16}}@keyframes pop{from{opacity:0;transform:scale(.15)}to{opacity:1;transform:scale(1)}}@keyframes adglow{0%,100%{stroke-width:2}50%{stroke-width:3.5}}';
+  defs.appendChild(sty); adSvg.appendChild(defs);
+
+  EDGES.forEach(e=>{
+    const isFwd=adState.fwdEdges.has(eKey(e.f,e.t));
+    const isBwd=adState.bwdEdges.has(eKey(e.f,e.t));
+    const fn=adN(e.f),tn=adN(e.t);
+    let x1=fn.x,y1=fn.y,x2=tn.x,y2=tn.y;
+    if(isBwd)[x1,y1,x2,y2]=[x2,y2,x1,y1];
+    const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy),R=28;
+    const ux=dx/len,uy=dy/len;
+    const sx=x1+ux*R,sy=y1+uy*R,ex=x2-ux*R,ey=y2-uy*R;
+    const col=isFwd?'#4338ca':isBwd?'#b45309':'#d8d5ce';
+    const mk=isFwd?'mk-ad-fwd':isBwd?'mk-ad-bwd':null;
+    const line=document.createElementNS(NS,'line');
+    line.setAttribute('x1',sx); line.setAttribute('y1',sy);
+    line.setAttribute('x2',ex); line.setAttribute('y2',ey);
+    line.setAttribute('stroke',col); line.setAttribute('stroke-width','1.8');
+    if(mk) line.setAttribute('marker-end','url(#'+mk+')');
+    if(isFwd||isBwd){
+      line.setAttribute('stroke-dasharray','5 3');
+      line.style.animation=`f${isBwd?'b':'f'} .45s linear infinite`;
+    }
+    adSvg.appendChild(line);
+    const mx=(sx+ex)/2,my=(sy+ey)/2-9;
+    const lt=document.createElementNS(NS,'text');
+    lt.setAttribute('x',mx); lt.setAttribute('y',my);
+    lt.setAttribute('text-anchor','middle');
+    lt.setAttribute('fill',(isFwd||isBwd)?col:'#ccc7be');
+    lt.setAttribute('font-size','9'); lt.setAttribute('font-family','JetBrains Mono,monospace');
+    lt.textContent=isBwd?e.bl:e.fl; adSvg.appendChild(lt);
+  });
+
+  NODES.forEach(n=>{
+    const hasV=adState.vals[n.id],hasG=adState.grads[n.id],isGlow=adState.glow.has(n.id);
+    const strokeCol=isGlow?'#15803d':hasG?'#b45309':hasV?'#4338ca':'#d8d5ce';
+    const g=document.createElementNS(NS,'g');
+    g.setAttribute('transform',`translate(${n.x},${n.y})`);
+    const circ=document.createElementNS(NS,'circle');
+    circ.setAttribute('r','28');
+    circ.setAttribute('fill',isGlow?'#f0fdf4':'#ffffff');
+    circ.setAttribute('stroke',strokeCol); circ.setAttribute('stroke-width',(hasV||hasG||isGlow)?'2.2':'1.5');
+    if(isGlow) circ.style.animation='adglow 1.5s ease-in-out infinite';
+    g.appendChild(circ);
+    const dy0=hasV?-10:hasG?-5:5;
+    const nt=document.createElementNS(NS,'text');
+    nt.setAttribute('text-anchor','middle'); nt.setAttribute('dy',dy0);
+    nt.setAttribute('fill','#17171a');
+    nt.setAttribute('font-size',(n.id==='s'||n.id==='f')?'8':'11');
+    nt.setAttribute('font-family','JetBrains Mono,monospace'); nt.setAttribute('font-weight','600');
+    nt.textContent=n.lbl; g.appendChild(nt);
+    if(hasV){
+      const vt=document.createElementNS(NS,'text');
+      vt.setAttribute('text-anchor','middle'); vt.setAttribute('dy','7');
+      vt.setAttribute('fill','#4338ca'); vt.setAttribute('font-size','14');
+      vt.setAttribute('font-family','JetBrains Mono,monospace'); vt.setAttribute('font-weight','700');
+      vt.style.animation='pop .3s ease'; vt.textContent=hasV; g.appendChild(vt);
+    }
+    if(hasG){
+      const gt=document.createElementNS(NS,'text');
+      gt.setAttribute('text-anchor','middle'); gt.setAttribute('dy','19');
+      gt.setAttribute('fill','#b45309'); gt.setAttribute('font-size','10');
+      gt.setAttribute('font-family','JetBrains Mono,monospace');
+      gt.style.animation='pop .3s ease'; gt.textContent='∇='+hasG; g.appendChild(gt);
+    }
+    adSvg.appendChild(g);
+  });
+}
+
+function adStatus(t){document.getElementById('ad-status').textContent=t;}
+function wait(ms){return new Promise(r=>setTimeout(r,ms));}
+
+async function runAdOnce(){
+  if(adTriggered)return;
+  adTriggered=true;
+  adState={fwdEdges:new Set(),bwdEdges:new Set(),vals:{},grads:{},glow:new Set()};
+  drawAd(); adStatus('computation graph ready');
+
+  await wait(700);
+  // fwd: x,y → s
+  adState.fwdEdges.add(eKey('x','s')); adState.fwdEdges.add(eKey('y','s'));
+  drawAd(); adStatus('forward → x=1, y=2 flow into addition node');
+  await wait(950);
+  adState.vals.x='1'; adState.vals.y='2'; adState.vals.s='3';
+  drawAd(); adStatus('forward → s = x + y = 3 ✓');
+  await wait(750);
+  // fwd: s,c → f
+  adState.fwdEdges.add(eKey('s','f')); adState.fwdEdges.add(eKey('c','f'));
+  adState.vals.c='4';
+  drawAd(); adStatus('forward → s=3, c=4 flow into multiply node');
+  await wait(950);
+  adState.vals.f='12';
+  drawAd(); adStatus('forward complete: f = s × c = 12 ✓');
+  await wait(1100);
+
+  // switch to backward
+  adState.fwdEdges=new Set(); adState.bwdEdges=new Set();
+  adState.grads.f='1';
+  drawAd(); adStatus('backward ← seed gradient  ∂L/∂f = 1');
+  await wait(850);
+  // bwd through multiply
+  adState.bwdEdges.add(eKey('s','f')); adState.bwdEdges.add(eKey('c','f'));
+  drawAd(); adStatus('backward ← chain rule through multiply node');
+  await wait(950);
+  adState.grads.s='4'; adState.grads.c='3';
+  drawAd(); adStatus('backward ← ∇s = 4,  ∇c = 3  propagated');
+  await wait(850);
+  // bwd through addition
+  adState.bwdEdges.delete(eKey('s','f')); adState.bwdEdges.delete(eKey('c','f'));
+  adState.bwdEdges.add(eKey('x','s')); adState.bwdEdges.add(eKey('y','s'));
+  drawAd(); adStatus('backward ← chain rule through addition node');
+  await wait(950);
+  // done
+  adState.grads.x='4'; adState.grads.y='4';
+  adState.bwdEdges=new Set();
+  adState.glow.add('x'); adState.glow.add('y'); adState.glow.add('c');
+  drawAd(); adStatus('∇x=4  ∇y=4  ∇c=3 — leaf gradients ready for optimizer ✓');
+}
+
+function adReplay(){
+  adTriggered=false;
+  runAdOnce();
+}
+
+new IntersectionObserver(([e])=>{
+  if(e.isIntersecting) runAdOnce();
+},{threshold:0.3}).observe(adSvg);
+
+// ══════════════════════════════════════════════════
+//  Timeline animation
+// ══════════════════════════════════════════════════
+const tlWrap = document.getElementById('timeline');
+const tlEntries = document.querySelectorAll('.tl-entry');
+
+// Reveal the spine when timeline scrolls into view
+new IntersectionObserver(([e]) => {
+  if (e.isIntersecting) tlWrap.classList.add('revealed');
+}, { threshold: 0.05 }).observe(tlWrap);
+
+// Stagger-reveal each entry as it enters the viewport
+const entryObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+tlEntries.forEach(el => entryObs.observe(el));
+
+// ══════════════════════════════════════════════════
+//  Init
+// ══════════════════════════════════════════════════
+window.addEventListener('load',()=>{
+  updateNav();
+  resizeSC();
+  animateSC();
+  drawAd();
+});
+window.addEventListener('resize',()=>{
+  const dpr=window.devicePixelRatio||1;
+  const rect=SC.parentElement.getBoundingClientRect();
+  SC.width=rect.width*dpr; SC.height=230*dpr;
+  SC.style.width=rect.width+'px'; SC.style.height='230px';
+  scCtx.setTransform(1,0,0,1,0,0); scCtx.scale(dpr,dpr);
+  drawSC();
+});
+</script>
+</body>
+</html>
