@@ -166,6 +166,12 @@
     .ptdesc a { color: var(--accent); font-family: var(--mono); font-size: 11px; text-decoration: none; }
     .ptdesc a:hover { text-decoration: underline; }
     .ptdesc code { font-family: var(--mono); font-size: 11px; color: var(--acc2); }
+    .proj-img {
+      display: block; width: 100%; margin-top: 14px;
+      max-height: 180px; object-fit: contain; object-position: center;
+      border-radius: 5px; border: 1px solid var(--border);
+      background: #fafaf8;
+    }
     .demo { background: var(--surf); border-top: 1px solid var(--border); padding: 18px 20px; }
     .demo-lbl {
       font-family: var(--mono); font-size: 10px; color: var(--muted);
@@ -413,6 +419,7 @@
           Three compiled <code>lax.scan</code> PPO kernels eliminate Python overhead — 28.9× faster on A100.<br><br>
           <a href="https://github.com/visheshnarayan/rl2xla" target="_blank">→ github.com/visheshnarayan/rl2xla</a>
         </div>
+        <img class="proj-img" src="img_rl2xla_speedup.png" alt="rl2xla speedup benchmarks">
       </div>
       <div class="demo">
         <div class="demo-lbl">// speedup vs. NumPy baseline</div>
@@ -439,6 +446,7 @@
           compute-optimal scaling laws from the resulting checkpoints.<br><br>
           <a href="https://github.com/visheshnarayan/jax-scaling-laws" target="_blank">→ github.com/visheshnarayan/jax-scaling-laws</a>
         </div>
+        <img class="proj-img" src="img_scaling_law.png" alt="Fitted scaling law: loss vs parameters and training tokens">
       </div>
       <div class="demo">
         <div class="demo-lbl">// trains 8 checkpoints → extracts (C, N) → recovers scaling law</div>
@@ -465,6 +473,7 @@
           <code>torch.autograd</code> on 12+ ops.<br><br>
           <a href="https://github.com/visheshnarayan/micrograd-jit" target="_blank">→ github.com/visheshnarayan/micrograd-jit</a>
         </div>
+        <img class="proj-img" src="img_micrograd_latency.png" alt="Eager vs JIT latency — 6-8× speedup across batch sizes">
       </div>
       <div class="demo">
         <div class="demo-lbl">// type any expression — forward then backward pass animates</div>
