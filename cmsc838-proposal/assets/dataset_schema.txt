@@ -1,0 +1,80 @@
+
+============================================================
+  eidon-ai/tracker-pov  —  Dataset Schema Summary
+  Pulled: 2026-10-21
+============================================================
+
+REPOSITORY STRUCTURE
+  tracker-pov         — 13,451 MP4 videos + metadata.parquet  (9.05 TB)
+  tracker-pov-imu     — 780M IMU rows across 13 parquet shards (~9.5 GB)
+  Both repos joined on `recording_id`.
+
+VIDEO COLUMNS (metadata.parquet + HF dataset)
+  recording_id          int64   — unique ID, joins to IMU repo
+  contributor_id        int64   — 27 contributors
+  duration_seconds      float   — total recording length
+  task_type             str     — cooking / folding_laundry / cleaning / etc. (9 classes)
+  recorded_at           str     — ISO 8601 timestamp
+  sensor_schema_version int     — 1 or 2
+  qc_status             str     — 'valid' | 'flagged' | 'invalid'
+  video_bytes           int     — MP4 file size
+  sensor_bytes          int     — IMU stream byte size
+  good_frame_percent    float   — fraction of QC-passing frames
+  hand_presence_ratio   float   — MediaPipe hand presence fraction
+  stability_score       float   — optical flow stability
+  lighting_score        float   — HSV brightness score
+  average_brightness    float
+  average_optical_flow  float
+  good_duration_seconds float   — seconds that passed QC
+  frames_sampled        int     — frames sampled for QC
+  reject_reasons        list    — VLM-derived rejection reasons
+  flag_reasons          list    — VLM-derived flag reasons
+  objects_detected      list    — detected objects
+  valid_reasons         list
+  video_width           int     — typically 1920 (1080p) or higher
+  video_height          int     — typically 1080
+  video_fps             float   — ~30 fps (mostly 29.917)
+  video_duration_seconds float
+  n_slots               int     — number of IMU sensors active (max 7)
+  has_chest             bool    — chest reference sensor present
+  has_raw_motion        bool    — accel/gyro/mag populated
+  n_snapshots           int     — IMU sample count for this recording
+
+IMU COLUMNS (tracker-pov-imu, ~780M rows)
+  recording_id  int32   — joins to video metadata
+  time_ms       int32   — milliseconds from start of recording
+  slot          int8    — body slot (0–6):
+                          0=left_hand  1=left_forearm  2=left_shoulder
+                          3=right_hand 4=right_forearm 5=right_shoulder
+                          6=chest
+  quat_x        float32 — quaternion x
+  quat_y        float32 — quaternion y
+  quat_z        float32 — quaternion z
+  quat_w        float32 — quaternion w  (unit quaternion: x²+y²+z²+w²=1)
+  accel_x/y/z   float32 — accelerometer (NaN if has_raw_motion=False)
+  gyro_x/y/z    float32 — gyroscope     (NaN if has_raw_motion=False)
+  mag_x/y/z     float32 — magnetometer  (NaN if has_raw_motion=False)
+
+  Sample rate: 24 Hz
+  Long-form: one row per (recording, timestamp, body_slot)
+  ~171 rows/second × 7 slots = ~1197 rows per 7-second recording
+
+ACTIVITY DISTRIBUTION
+  folding_laundry   8,747 recordings  860.2 h  67.5%
+  cleaning          2,384 recordings  276.3 h  21.7%
+  doing_the_dishes    984 recordings   52.1 h   4.1%
+  cooking             795 recordings   39.5 h   3.1%
+  drawing             166 recordings   18.2 h   1.4%
+  knitting            159 recordings   14.8 h   1.2%
+  making_the_bed      130 recordings    8.5 h   0.7%
+  watering_plants      67 recordings    2.3 h   0.2%
+  organizing           19 recordings    2.1 h   0.2%
+
+QC STATUS
+  valid    11,841 recordings  1,160.0 h
+  flagged   1,138 recordings     98.2 h
+  invalid     472 recordings     15.7 h
+
+SCALE
+  Total: 13,451 recordings, 1,273.8 hours, 27 contributors
+  IMU: ~780M rows, 24 Hz, 7 body sensors

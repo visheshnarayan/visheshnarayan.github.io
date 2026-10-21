@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiffKinem-WM — Project Proposal</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #161616;
+    --border: #222222;
+    --border-accent: #2a2a2a;
+    --text: #e8e8e8;
+    --text-dim: #888888;
+    --text-dimmer: #444444;
+    --accent: #d4a853;
+    --accent2: #7c6fcd;
+    --accent3: #4a9eff;
+    --orange: #c97c2e;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+    /* diagram box tokens */
+    --box-bg:     #1c1a14;
+    --box-bd:     #3a3520;
+    --box-fg:     #d4c89a;
+    --box-hi-bg:  #1a1320;
+    --box-hi-bd:  #4a3a6e;
+    --box-hi-fg:  #b8a8e0;
+    --box-act-bg: #1f1500;
+    --box-act-bd: #6b4400;
+    --box-org-bg: #1f1200;
+    --box-org-bd: #7a4800;
+    --box-org-fg: #e8962a;
+    --grp-blue:   #1e4470;
+    --grp-purple: #5a4080;
+  }
+
+  html.light {
+    --bg: #f5f4f0;
+    --surface: #edece8;
+    --surface2: #e6e5e0;
+    --border: #d0cfc8;
+    --border-accent: #bdbcb4;
+    --text: #1a1a18;
+    --text-dim: #666660;
+    --text-dimmer: #a0a098;
+    --accent: #b8861e;
+    --accent2: #5a4fb0;
+    --accent3: #2a7ee8;
+    /* diagram box tokens — light */
+    --box-bg:     #eceae2;
+    --box-bd:     #c0bfb0;
+    --box-fg:     #4a4228;
+    --box-hi-bg:  #eae8f5;
+    --box-hi-bd:  #8878cc;
+    --box-hi-fg:  #4030a0;
+    --box-act-bg: #f5edd8;
+    --box-act-bd: #b88c30;
+    --box-org-bg: #f5edd8;
+    --box-org-bd: #b07030;
+    --box-org-fg: #904c10;
+    --grp-blue:   #1a4db8;
+    --grp-purple: #6858b0;
+  }
+
+  html { background: var(--bg); }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ── slides container ── */
+  #deck {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 4.5vh 8vw 3vh;
+    opacity: 0;
+    transform: translateY(24px);
+    pointer-events: none;
+    transition: opacity 0.45s cubic-bezier(.4,0,.2,1), transform 0.45s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* body area below title: fills remaining height and centers its content */
+  .slide-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 0;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  .slide.exit-up {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+
+  /* ── animated node system ── */
+  .anode {
+    opacity: 0.12;
+    transform: scale(0.96);
+    transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+    pointer-events: none;
+  }
+  .anode.lit {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .anode.active-node {
+    box-shadow: 0 0 0 1px var(--accent), 0 0 18px 2px rgba(212,168,83,0.22);
+    border-color: var(--accent) !important;
+  }
+  .anode.grad-node {
+    box-shadow: 0 0 0 1px var(--accent2), 0 0 18px 2px rgba(124,111,205,0.22);
+    border-color: var(--accent2) !important;
+  }
+  .aarrow {
+    opacity: 0.08;
+    transition: opacity 0.35s ease, color 0.35s ease;
+  }
+  .aarrow.lit { opacity: 0.5; }
+  .aarrow.active-node { opacity: 1; color: var(--accent); }
+  .aarrow.grad-node   { opacity: 1; color: var(--accent2); }
+
+  #lewm-diagram {
+    width: 100%;
+    position: relative;
+    display: grid;
+    grid-template-columns: auto auto auto auto auto auto auto auto auto;
+    grid-template-rows: auto 1.4rem auto 1.2rem auto;
+    align-items: center;
+    justify-items: start;
+    gap: 0 0.3rem;
+    margin: 1rem 0;
+  }
+
+  #lewm-caption {
+    min-height: 2.2rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    text-align: center;
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border-top: 1px solid var(--border);
+    transition: opacity 0.3s ease;
+  }
+
+  #lewm-pass-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-accent);
+    color: var(--text-dimmer);
+    transition: color 0.3s ease, border-color 0.3s ease;
+    margin-top: 0.5rem;
+  }
+  #lewm-pass-label.fwd { color: var(--accent);  border-color: var(--accent); }
+  #lewm-pass-label.bwd { color: var(--accent2); border-color: var(--accent2); }
+
+  /* loss pills */
+  .loss-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-accent);
+    color: var(--text-dim);
+    background: var(--surface2);
+    opacity: 0.1;
+    transition: opacity 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+  }
+  .loss-pill.lit { opacity: 1; }
+  .loss-pill.active-node { border-color: var(--accent2); color: var(--text); }
+
+  /* ── subtle grid bg ── */
+  .slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 64px 64px;
+    opacity: 0.18;
+    pointer-events: none;
+  }
+
+  /* ── nav ── */
+  #nav {
+    position: fixed;
+    bottom: 2.4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    z-index: 100;
+    background: rgba(17,17,17,0.85);
+    border: 1px solid var(--border-accent);
+    border-radius: 999px;
+    padding: 0.55rem 1.4rem;
+    backdrop-filter: blur(12px);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+
+  #nav button {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 0.3rem;
+    transition: color 0.2s;
+    line-height: 1;
+  }
+  #nav button:hover { color: var(--text); }
+
+  #slide-counter { min-width: 4.5ch; text-align: center; }
+
+  /* ── progress bar ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+    z-index: 200;
+  }
+
+  /* ── hint ── */
+  #hint {
+    position: fixed;
+    top: 1.4rem;
+    right: 5.5rem;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--text-dimmer);
+    letter-spacing: 0.1em;
+    z-index: 100;
+  }
+
+  #theme-toggle {
+    position: fixed;
+    top: 1.1rem;
+    right: 1.8rem;
+    z-index: 100;
+    background: none;
+    border: 1px solid var(--border-accent);
+    border-radius: 6px;
+    color: var(--text-dimmer);
+    font-size: 1rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  #theme-toggle:hover { color: var(--text); border-color: var(--text-dim); }
+
+  /* ─────────────────────────────────────────────
+     SLIDE CONTENT COMPONENTS
+  ───────────────────────────────────────────── */
+
+  .slide-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    color: var(--text-dimmer);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+    align-self: flex-start;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--text);
+    text-align: center;
+  }
+
+  h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    font-weight: 300;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    margin-bottom: 1.6rem;
+    align-self: flex-start;
+    color: var(--text);
+  }
+
+  .byline {
+    font-family: var(--mono);
+    font-size: clamp(0.85rem, 1.6vw, 1.1rem);
+    color: var(--text-dim);
+    margin-top: 1.4rem;
+    letter-spacing: 0.04em;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--border-accent);
+    border-radius: 4px;
+    color: var(--text-dim);
+    margin-top: 1.8rem;
+    text-transform: uppercase;
+  }
+
+  /* bullets */
+  ul.bullets {
+    list-style: none;
+    align-self: flex-start;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  ul.bullets li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+    font-weight: 300;
+    line-height: 1.55;
+    color: var(--text);
+  }
+
+  ul.bullets li::before {
+    content: '—';
+    color: var(--text-dimmer);
+    flex-shrink: 0;
+    margin-top: 0.05em;
+    font-family: var(--mono);
+  }
+
+  ul.bullets li.sub {
+    margin-left: 2.2rem;
+    font-size: clamp(0.85rem, 1.5vw, 1.05rem);
+    color: var(--text-dim);
+  }
+
+  ul.bullets li strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* two-col */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4vw;
+    width: 100%;
+    align-items: start;
+  }
+
+  /* arch diagram boxes */
+  .arch {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    width: 100%;
+  }
+
+  .arch-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .box {
+    background: var(--box-bg);
+    border: 1px solid var(--box-bd);
+    border-radius: 10px;
+    padding: 0.7rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.88rem;
+    color: var(--box-fg);
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+    transition: background 0.3s, border-color 0.3s, color 0.3s;
+  }
+
+  .box.highlight {
+    background: var(--box-hi-bg);
+    border-color: var(--box-hi-bd);
+    color: var(--box-hi-fg);
+  }
+
+  .box.action {
+    background: var(--box-act-bg);
+    border-color: var(--box-act-bd);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .box.orange {
+    background: var(--box-org-bg);
+    border-color: var(--box-org-bd);
+    color: var(--box-org-fg);
+  }
+
+  .arrow {
+    color: var(--text-dimmer);
+    font-size: 1.1rem;
+    font-family: var(--mono);
+  }
+
+  .arrow.red { color: #c44; }
+
+  /* group borders */
+  .group-box {
+    border: 1.5px solid;
+    border-radius: 12px;
+    padding: 1.4rem 1.6rem;
+    position: relative;
+  }
+
+  .group-box.green  { border-color: var(--grp-blue); }
+  .group-box.purple { border-color: var(--grp-purple); }
+
+  .group-label {
+    position: absolute;
+    bottom: -0.6rem;
+    left: 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    color: var(--text-dimmer);
+    background: var(--bg);
+    padding: 0 0.5rem;
+    text-transform: uppercase;
+  }
+
+  /* objective formula */
+  .formula {
+    font-family: var(--mono);
+    font-size: clamp(1rem, 2.5vw, 1.6rem);
+    color: var(--text);
+    line-height: 2;
+    text-align: center;
+    padding: 2rem;
+    border: 1px solid var(--border-accent);
+    border-radius: 12px;
+    background: var(--surface2);
+    width: 100%;
+  }
+
+  .formula .f-box {
+    display: inline-block;
+    background: var(--box-bg);
+    border: 1px solid var(--box-bd);
+    border-radius: 6px;
+    padding: 0.1rem 0.7rem;
+    font-size: 0.85em;
+    color: var(--box-fg);
+    vertical-align: middle;
+    transition: background 0.3s, border-color 0.3s, color 0.3s;
+  }
+
+  .formula-note {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dimmer);
+    margin-top: 1.2rem;
+    line-height: 1.6;
+    text-align: left;
+    padding: 0.8rem 1.2rem;
+    border-left: 2px solid var(--border-accent);
+  }
+
+  /* SIGReg visual */
+  .sigreg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+    margin-top: 1.4rem;
+  }
+
+  .sigreg-panel {
+    border: 1px solid var(--border-accent);
+    border-radius: 10px;
+    padding: 1.2rem;
+    background: var(--surface2);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-align: center;
+  }
+
+  .sigreg-panel .panel-title {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--text-dimmer);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  /* question callout */
+  .q-block {
+    background: var(--surface2);
+    border: 1px solid var(--border-accent);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 1.4rem 1.8rem;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .q-block .q-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .q-block p {
+    font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+    font-weight: 300;
+    line-height: 1.55;
+    color: var(--text);
+  }
+
+  /* dataset card */
+  .dataset-card {
+    background: var(--surface2);
+    border: 1px solid var(--border-accent);
+    border-radius: 12px;
+    padding: 1.8rem 2rem;
+    width: 100%;
+  }
+
+  .dataset-card .ds-title {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent3);
+    margin-bottom: 1.2rem;
+  }
+
+  .stat-row {
+    display: flex;
+    gap: 3rem;
+    margin-top: 1.4rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .stat { display: flex; flex-direction: column; gap: 0.3rem; }
+  .stat .val {
+    font-family: var(--mono);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .stat .key {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: var(--text-dimmer);
+    text-transform: uppercase;
+  }
+
+  /* center slide */
+  .center-all {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* questions slide big text */
+  .q-big {
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 200;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    position: relative;
+  }
+
+  .q-big::after {
+    content: '';
+    display: block;
+    width: 2ch;
+    height: 2px;
+    background: var(--accent);
+    margin: 1.2rem auto 0;
+  }
+
+  /* stop badge */
+  .stop-badge {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.7rem;
+    border: 1px solid #c44;
+    border-radius: 4px;
+    color: #c44;
+    display: inline-block;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    margin-top: 0.5rem;
+  }
+  .stop-badge.visible { opacity: 1; }
+
+  .frozen-badge {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.7rem;
+    border: 1px solid var(--text-dimmer);
+    border-radius: 4px;
+    color: var(--text-dimmer);
+    display: inline-block;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    margin-top: 0.5rem;
+  }
+  .frozen-badge.visible { opacity: 1; }
+
+  .anim-pass-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-accent);
+    color: var(--text-dimmer);
+    transition: color 0.3s ease, border-color 0.3s ease;
+    margin-top: 0.4rem;
+    display: inline-block;
+  }
+  .anim-pass-label.fwd  { color: var(--accent);  border-color: var(--accent); }
+  .anim-pass-label.bwd  { color: var(--accent2); border-color: var(--accent2); }
+  .anim-pass-label.stop { color: #c44;           border-color: #c44; }
+
+  .anim-caption {
+    min-height: 1.6rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid var(--border);
+    width: 100%;
+    margin-top: 0.5rem;
+    transition: opacity 0.3s ease;
+  }
+
+  /* stretch goal quote */
+  .quote-block {
+    border: 1px solid var(--border-accent);
+    border-left: 3px solid var(--accent2);
+    border-radius: 8px;
+    padding: 1.4rem 1.8rem;
+    width: 100%;
+    margin-bottom: 1.2rem;
+    background: var(--surface2);
+  }
+
+  .quote-block p {
+    font-style: italic;
+    font-size: clamp(0.9rem, 1.6vw, 1.1rem);
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="hint">SPACE / → to advance</div>
+<button id="theme-toggle" title="Toggle light/dark mode">◑</button>
+
+<div id="deck">
+
+  <!-- ── SLIDE 1: Title ── -->
+  <section class="slide active center-all" id="s1">
+    <div class="slide-label">CMSC838 · Project Proposal</div>
+    <h1>DiffKinem-WM</h1>
+    <p class="byline">Vishesh Narayan &nbsp;·&nbsp; Arjun Mudda</p>
+    <span class="tag">Differentiable Kinematics World Model</span>
+  </section>
+
+  <!-- ── SLIDE 2: LeWM Overview ── -->
+  <section class="slide" id="s2">
+    <div class="slide-label">Background</div>
+    <h2>LeWorldModel: Stable End-to-End JEPA from Pixels</h2>
+    <div class="slide-body">
+    <div class="two-col">
+      <ul class="bullets">
+        <li>No frozen encoders</li>
+        <li>No EMA</li>
+        <li>No stop gradients</li>
+        <li>No masking</li>
+      </ul>
+      <ul class="bullets">
+        <li>Joint Embedded Predictive Architecture</li>
+        <li>Planning is through latents</li>
+        <li>No reconstruction</li>
+      </ul>
+    </div>
+    <div style="margin-top:2rem;width:100%;background:var(--surface2);border:1px solid var(--border-accent);border-radius:10px;padding:1.4rem;">
+      <div style="font-family:var(--mono);font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dimmer);margin-bottom:0.9rem;">SIGReg — Anti-Collapse Regularization</div>
+      <div class="sigreg-grid">
+        <div class="sigreg-panel">
+          <div class="panel-title">Latent Embedding Distribution</div>
+          <div style="font-size:1.4rem;color:var(--text-dimmer);padding:0.6rem 0;">⊙</div>
+          <div>Optimizes spread across the embedding space via random univariate projections</div>
+        </div>
+        <div class="sigreg-panel">
+          <div class="panel-title">Normality Test</div>
+          <div style="font-size:1.4rem;color:var(--text-dimmer);padding:0.6rem 0;">∿</div>
+          <div>Pushes marginals toward Gaussian — prevents representation collapse</div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 3: LeWM Architecture (animated) ── -->
+  <section class="slide" id="s3">
+    <div class="slide-label">Architecture · Forward Pass</div>
+    <h2 style="margin-bottom:1rem;">LeWM Forward Pass</h2>
+    <div class="slide-body">
+
+    <!--
+      Grid layout  (9 cols × 5 rows):
+      col: Ot  →  ViT  →  zt  →  Trans  →  guess
+      row1: O_t path
+      row2: spacer + vertical connector lines
+      row3: action a_t row
+      row4: spacer
+      row5: O_t+1 path
+    -->
+    <div id="lewm-diagram">
+
+      <!-- ROW 1: O_t → ViT → z_t → Transformer → guess z_t+1 -->
+      <div class="box anode" id="an-ot"    style="grid-column:1;grid-row:1;">O<sub style="font-size:0.7em">t</sub></div>
+      <span class="aarrow" id="aa-1"       style="grid-column:2;grid-row:1;padding:0 0.3rem;">→</span>
+      <div class="box anode" id="an-vit1"  style="grid-column:3;grid-row:1;">ViT</div>
+      <span class="aarrow" id="aa-2"       style="grid-column:4;grid-row:1;padding:0 0.3rem;">→</span>
+      <div class="box anode" id="an-zt"    style="grid-column:5;grid-row:1;">z<sub style="font-size:0.7em">t</sub></div>
+      <span class="aarrow" id="aa-3"       style="grid-column:6;grid-row:1;padding:0 0.3rem;">→</span>
+      <div class="box anode highlight" id="an-trans" style="grid-column:7;grid-row:1;grid-row-end:span 3;align-self:center;">
+        Transformer<br><span style="font-size:0.62em;color:var(--text-dimmer);">AdaLN on a<sub>t</sub></span>
+      </div>
+      <span class="aarrow" id="aa-5"       style="grid-column:8;grid-row:1;padding:0 0.3rem;align-self:center;grid-row-end:span 3;">→</span>
+      <div class="box anode" id="an-guess" style="grid-column:9;grid-row:1;grid-row-end:span 3;align-self:center;">
+        guess z<sub style="font-size:0.7em">t+1</sub>
+      </div>
+
+      <!-- ROW 3: a_t injected -->
+      <div class="box anode action" id="an-at" style="grid-column:3;grid-row:3;justify-self:center;">
+        a<sub style="font-size:0.7em">t</sub>
+      </div>
+      <span class="aarrow" id="aa-4" style="grid-column:4;grid-row:3;padding:0 0.3rem;">→→</span>
+
+      <!-- ROW 5: O_t+1 → ViT → z_t+1 -->
+      <div class="box anode" id="an-ot1"   style="grid-column:1;grid-row:5;">O<sub style="font-size:0.7em">t+1</sub></div>
+      <span class="aarrow" id="aa-6"       style="grid-column:2;grid-row:5;padding:0 0.3rem;">→</span>
+      <div class="box anode" id="an-vit2"  style="grid-column:3;grid-row:5;">ViT</div>
+      <span class="aarrow" id="aa-7"       style="grid-column:4;grid-row:5;padding:0 0.3rem;">→</span>
+      <div class="box anode" id="an-zt1"   style="grid-column:5;grid-row:5;">z<sub style="font-size:0.7em">t+1</sub><br><span style="font-size:0.62em;color:var(--text-dimmer);">actual</span></div>
+    </div>
+
+    <!-- Loss terms row -->
+    <div style="display:flex;gap:1rem;justify-content:center;margin-bottom:0.6rem;">
+      <span class="loss-pill" id="lp-mse">MSE( guess z<sub>t+1</sub>, actual z<sub>t+1</sub> )</span>
+      <span class="loss-pill" id="lp-sig">λ/2 · SigReg(z<sub>t</sub>) + SigReg(z<sub>t+1</sub>)</span>
+    </div>
+
+    <div id="lewm-caption">Shared ViT encoders · action-conditioned Transformer · no reconstruction</div>
+    <div id="lewm-pass-label">—</div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 4: SIGReg — Anti-Collapse Regularization (animated) ── -->
+  <section class="slide" id="s-sigreg">
+    <div class="slide-label">Background · Regularization</div>
+    <h2>SIGReg — Anti-Collapse Regularization</h2>
+    <div class="slide-body">
+
+    <div style="display:flex;gap:3.5rem;width:100%;align-items:flex-start;flex:1;margin-top:0.4rem;">
+
+      <!-- LEFT: equation + bullets -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:1.1rem;">
+        <div class="formula" style="font-size:0.9rem;padding:1.2rem 1.6rem;text-align:left;line-height:1.9;">
+          <div style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-dimmer);margin-bottom:0.7rem;">Regularization Loss</div>
+          SIGReg(Z) = 𝔼<sub style="font-size:0.72em">v ~ S<sup>d−1</sup></sub>
+          <span class="f-box" style="margin:0 0.4rem;">normality( Z·v )</span>
+          <div style="font-size:0.72rem;color:var(--text-dimmer);margin-top:0.8rem;font-family:var(--mono);">
+            Total: MSE(ẑ, z) + λ/2 · ( SIGReg(z<sub>t</sub>) + SIGReg(z<sub>t+1</sub>) )
+          </div>
+        </div>
+        <ul class="bullets" style="font-size:0.95rem;">
+          <li><strong>Z</strong> &nbsp;batch of latent embeddings</li>
+          <li><strong>v</strong> &nbsp;random unit vector — projection direction</li>
+          <li>Each 1D projection pushed toward <strong>N(0,1)</strong></li>
+          <li>No frozen encoders, EMA, or stop-gradients needed</li>
+          <li>Batch size matters — more samples → better normality estimate</li>
+        </ul>
+      </div>
+
+      <!-- RIGHT: canvas animation -->
+      <div style="flex:1.1;display:flex;flex-direction:column;align-items:center;gap:0.7rem;">
+        <div style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dimmer);">Latent space — before &amp; after SIGReg</div>
+        <canvas id="sigreg-canvas" width="380" height="260" style="border-radius:10px;border:1px solid var(--border-accent);display:block;"></canvas>
+        <div id="sigreg-anim-label" style="font-family:var(--mono);font-size:0.68rem;color:var(--text-dim);letter-spacing:0.05em;text-align:center;">—</div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 5: LeWM Objective Functions ── -->
+  <section class="slide" id="s4">
+    <div class="slide-label">Training Objective</div>
+    <h2>LeWM Objective Functions</h2>
+    <div class="slide-body">
+    <div class="formula">
+      MSE( <span class="f-box">actual z<sub>t+1</sub></span> , <span class="f-box">guess z<sub>t+1</sub></span> )
+      <br>+<br>
+      λ/2 · ( SigReg( <span class="f-box">z<sub>t</sub></span> ) + SigReg( <span class="f-box">z<sub>t+1</sub></span> ) )
+    </div>
+    <p class="formula-note">
+      Note: batch size is critical for SigReg. This example assumes batch size = 1;<br>
+      in practice a larger batch is needed for stable normality estimation.
+    </p>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 6: SIGReg problem ── -->
+  <section class="slide" id="s5">
+    <div class="slide-label">Motivation</div>
+    <h2>SIGReg anti-collapse may not produce action-sensitive latents</h2>
+    <div class="slide-body">
+    <div class="arch" style="gap:2rem;">
+      <div style="padding:1.2rem;border:1px solid var(--border-accent);border-radius:10px;background:var(--surface2);">
+        <div style="font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dimmer);margin-bottom:0.8rem;">Same observation O<sub>t</sub></div>
+        <div class="arch-row">
+          <div class="box">O<sub style="font-size:0.7em">t</sub></div>
+          <span class="arrow">→</span>
+          <div class="box">ViT</div>
+          <span class="arrow">→</span>
+          <div class="box">z<sub style="font-size:0.7em">t</sub></div>
+          <span class="arrow">→</span>
+          <div class="box orange">DRIVE FORWARD</div>
+          <span class="arrow">→</span>
+          <div class="box highlight">Transformer</div>
+          <span class="arrow">→</span>
+          <div class="box">guess z<sub style="font-size:0.7em">t+1</sub></div>
+        </div>
+        <div style="height:0.8rem;"></div>
+        <div class="arch-row">
+          <div class="box">O<sub style="font-size:0.7em">t</sub></div>
+          <span class="arrow">→</span>
+          <div class="box">ViT</div>
+          <span class="arrow">→</span>
+          <div class="box">z<sub style="font-size:0.7em">t</sub></div>
+          <span class="arrow">→</span>
+          <div class="box orange">DRIVE BACKWARD</div>
+          <span class="arrow">→</span>
+          <div class="box highlight">Transformer</div>
+          <span class="arrow">→</span>
+          <div class="box">guess z<sub style="font-size:0.7em">t+1</sub></div>
+        </div>
+      </div>
+      <div style="font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);padding:0.8rem 1.2rem;border-left:3px solid #c44;border-radius:4px;background:var(--surface2);">
+        These should produce completely different latents — yet LeWM does not guarantee they will diverge.
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 6: Capabilities ── -->
+  <section class="slide" id="s6">
+    <div class="slide-label">Proposal</div>
+    <h2>A Differentiable Kinematics Model could</h2>
+    <div class="slide-body">
+    <div class="q-block">
+      <div class="q-label">Capability 1</div>
+      <p>A physics probe trained on sensory data, current state, and latent representations could predict future hand placements — grounding the latent space in physical reality rather than pure pixel statistics.</p>
+    </div>
+    <div class="q-block" style="border-left-color:var(--accent2);">
+      <div class="q-label" style="color:var(--accent2);">Capability 2</div>
+      <p>The physics probe could shape "better" latents — ones that are action-sensitive and physically meaningful, enabling faster adaptation to new robotic setups without retraining LeWM from scratch.</p>
+    </div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 7: Stop Gradient Architecture (animated) ── -->
+  <section class="slide" id="s7">
+    <div class="slide-label">Architecture · Phase 1</div>
+    <h2>Architecture with stop gradient</h2>
+    <div class="slide-body">
+    <div style="display:flex;gap:1.6rem;width:100%;align-items:stretch;">
+
+      <!-- GREEN: LeWM Frozen -->
+      <div class="group-box green" style="flex:1.4;">
+        <div class="arch" style="gap:0.8rem;">
+          <div class="arch-row">
+            <div class="box anode" id="sg-ot">O<sub style="font-size:0.7em">t</sub></div>
+            <span class="aarrow" id="sg-a1">→</span>
+            <div class="box anode" id="sg-vit1">ViT</div>
+            <span class="aarrow" id="sg-a2">→</span>
+            <div class="box anode" id="sg-zt">z<sub style="font-size:0.7em">t</sub></div>
+          </div>
+          <div class="arch-row">
+            <div class="box anode" id="sg-ot1">O<sub style="font-size:0.7em">t+1</sub></div>
+            <span class="aarrow" id="sg-a6">→</span>
+            <div class="box anode" id="sg-vit2">ViT</div>
+            <span class="aarrow" id="sg-a7">→</span>
+            <div class="box anode" id="sg-zt1">z<sub style="font-size:0.7em">t+1</sub></div>
+          </div>
+          <div class="arch-row">
+            <div class="box anode" id="sg-sensor">sensor data</div>
+            <span class="aarrow" id="sg-a3">→</span>
+            <div class="box anode highlight" id="sg-pred">Predictor</div>
+            <span class="aarrow" id="sg-a4">→</span>
+            <div class="box anode" id="sg-zhat">ẑ<sub style="font-size:0.7em">t+1</sub></div>
+          </div>
+        </div>
+        <div id="sg-frozen" class="frozen-badge">⬡ frozen — no gradient enters</div>
+        <div class="group-label">LeWM Style (Frozen)</div>
+      </div>
+
+      <!-- PURPLE: Physics Prober -->
+      <div class="group-box purple" style="flex:1;">
+        <div class="arch" style="gap:0.8rem;">
+          <div class="arch-row">
+            <span class="aarrow" id="sg-a5">→</span>
+            <div class="box anode" id="sg-mlp">MLP</div>
+            <span class="aarrow" id="sg-a8">→</span>
+            <div class="box anode" id="sg-phys">Phys Eqns</div>
+          </div>
+          <div class="arch-row">
+            <div class="box anode" id="sg-loss">Loss Eqn</div>
+          </div>
+          <div class="arch-row">
+            <div class="box anode" id="sg-ot1gt">O<sub style="font-size:0.7em">t+1</sub></div>
+            <span class="aarrow" id="sg-a9">→</span>
+            <div class="box anode" id="sg-loss2">Loss Eqn</div>
+          </div>
+        </div>
+        <div id="sg-stop" class="stop-badge">◀ gradient stops here</div>
+        <div class="group-label">Physics Prober</div>
+      </div>
+    </div>
+
+    <div id="sg-caption" class="anim-caption">Physics probe trains to predict kinematics — LeWM weights stay frozen</div>
+    <div style="text-align:center;"><div id="sg-pass-label" class="anim-pass-label">—</div></div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 8: End-to-End Architecture (animated) ── -->
+  <section class="slide" id="s8">
+    <div class="slide-label">Architecture · Phase 2</div>
+    <h2>End to End Architecture</h2>
+    <div class="slide-body">
+    <div style="display:flex;gap:1.6rem;width:100%;align-items:stretch;">
+
+      <!-- GREEN: LeWM (trainable) -->
+      <div class="group-box green" style="flex:1.4;">
+        <div class="arch" style="gap:0.8rem;">
+          <div class="arch-row">
+            <div class="box anode" id="e2e-ot">O<sub style="font-size:0.7em">t</sub></div>
+            <span class="aarrow" id="e2e-a1">→</span>
+            <div class="box anode" id="e2e-vit1">ViT</div>
+            <span class="aarrow" id="e2e-a2">→</span>
+            <div class="box anode" id="e2e-zt">z<sub style="font-size:0.7em">t</sub></div>
+          </div>
+          <div class="arch-row">
+            <div class="box anode" id="e2e-ot1">O<sub style="font-size:0.7em">t+1</sub></div>
+            <span class="aarrow" id="e2e-a6">→</span>
+            <div class="box anode" id="e2e-vit2">ViT</div>
+            <span class="aarrow" id="e2e-a7">→</span>
+            <div class="box anode" id="e2e-zt1">z<sub style="font-size:0.7em">t+1</sub></div>
+          </div>
+          <div class="arch-row">
+            <div class="box anode" id="e2e-sensor">sensor data</div>
+            <span class="aarrow" id="e2e-a3">→</span>
+            <div class="box anode highlight" id="e2e-pred">Predictor</div>
+            <span class="aarrow" id="e2e-a4">→</span>
+            <div class="box anode" id="e2e-zhat">ẑ<sub style="font-size:0.7em">t+1</sub></div>
+          </div>
+          <div class="arch-row" style="margin-top:0.2rem;">
+            <span class="aarrow" id="e2e-grad-arrow" style="font-size:0.8rem;letter-spacing:0.04em;opacity:0.08;transition:opacity 0.4s ease,color 0.4s ease;">◀── gradient flows back</span>
+          </div>
+        </div>
+        <div class="group-label">End-to-end (gradient flow back)</div>
+      </div>
+
+      <!-- PURPLE: Physics Prober -->
+      <div class="group-box purple" style="flex:1;">
+        <div class="arch" style="gap:0.8rem;">
+          <div class="arch-row">
+            <span class="aarrow" id="e2e-a5">→</span>
+            <div class="box anode" id="e2e-mlp">MLP</div>
+            <span class="aarrow" id="e2e-a8">→</span>
+            <div class="box anode" id="e2e-phys">Phys Eqns</div>
+          </div>
+          <div class="arch-row">
+            <div class="box anode" id="e2e-loss">Loss Eqn</div>
+          </div>
+          <div class="arch-row">
+            <div class="box anode" id="e2e-ot1gt">O<sub style="font-size:0.7em">t+1</sub></div>
+            <span class="aarrow" id="e2e-a9">→</span>
+            <div class="box anode" id="e2e-loss2">Loss Eqn</div>
+          </div>
+        </div>
+        <div class="group-label">Physics Prober</div>
+      </div>
+    </div>
+
+    <div id="e2e-caption" class="anim-caption">Physics probe gradient flows back through LeWM — shaping action-sensitive latents</div>
+    <div style="text-align:center;"><div id="e2e-pass-label" class="anim-pass-label">—</div></div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 9: Physical Grounding Vision (animated) ── -->
+  <section class="slide" id="s-grounding">
+    <div class="slide-label">Broader Vision</div>
+    <h2>Physics Probe as Universal Grounding Layer</h2>
+    <div class="slide-body">
+
+    <div style="display:flex;gap:1.2rem;width:100%;align-items:center;">
+
+      <!-- LEFT: LeWM -->
+      <div class="group-box green anode" id="gr-lewm" style="flex:0.75;padding:1rem 1.2rem;text-align:center;">
+        <div style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dimmer);margin-bottom:0.7rem;">LeWM</div>
+        <div class="box anode" id="gr-z" style="margin:0 auto 0.5rem;display:inline-block;">z<sub style="font-size:0.7em">t</sub>, z<sub style="font-size:0.7em">t+1</sub></div>
+        <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text-dimmer);">general latents<br>learned once</div>
+        <div class="group-label" style="bottom:-0.5rem;">Backbone</div>
+      </div>
+
+      <!-- MIDDLE: probe + arrow -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.6rem;flex-shrink:0;">
+        <span class="aarrow" id="gr-a0" style="font-size:1.1rem;">→</span>
+        <div class="box anode highlight" id="gr-probe" style="text-align:center;padding:0.7rem 1rem;">
+          Physics<br>Probe
+          <div style="font-size:0.58em;color:var(--text-dimmer);margin-top:0.3rem;">retrain per setup</div>
+        </div>
+        <span class="aarrow" id="gr-a-out" style="font-size:1.1rem;">→</span>
+      </div>
+
+      <!-- RIGHT: big purple Physical Grounding box -->
+      <div class="group-box purple anode" id="gr-big" style="flex:1.4;padding:1.1rem 1.3rem;">
+        <div style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dimmer);margin-bottom:0.8rem;">Physical Grounding</div>
+        <div class="arch" style="gap:0.65rem;">
+          <div class="arch-row">
+            <div class="box anode" id="gr-robot-a" style="flex:1;">Robot A &nbsp;<span style="color:var(--text-dimmer);font-size:0.7em">arm / manipulation</span></div>
+          </div>
+          <div class="arch-row">
+            <div class="box anode" id="gr-robot-b" style="flex:1;">Robot B &nbsp;<span style="color:var(--text-dimmer);font-size:0.7em">wearable / hand</span></div>
+          </div>
+          <div class="arch-row">
+            <div class="box anode" id="gr-robot-c" style="flex:1;">Robot C &nbsp;<span style="color:var(--text-dimmer);font-size:0.7em">mobile / whole-body</span></div>
+          </div>
+        </div>
+        <div class="group-label" style="bottom:-0.5rem;">Adaptable to any kinematics</div>
+      </div>
+    </div>
+
+    <!-- benefit pills -->
+    <div style="display:flex;gap:0.8rem;justify-content:center;margin-top:0.6rem;flex-wrap:wrap;">
+      <span class="loss-pill" id="gr-b1">Reuse trained latents — no full retraining</span>
+      <span class="loss-pill" id="gr-b2">Faster convergence per robot</span>
+      <span class="loss-pill" id="gr-b3">Physics regularises representation quality</span>
+    </div>
+
+    <div id="gr-caption" class="anim-caption">Same LeWM backbone — swap the physics probe to transfer to a new robot</div>
+    <div style="text-align:center;"><div id="gr-pass-label" class="anim-pass-label">—</div></div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 10 (was 9): Dataset ── -->
+  <section class="slide" id="s9">
+    <div class="slide-label">Data</div>
+    <h2>Our Dataset</h2>
+    <div class="slide-body">
+    <div class="dataset-card">
+      <div class="ds-title">Eidon Tracker POV &nbsp;·&nbsp; eidon-ai/tracker-pov (Hugging Face)</div>
+      <ul class="bullets">
+        <li>Seven-sensor IMU data paired with head-mounted camera videos of participants doing chores</li>
+        <li>Train latent representations of the chore / task / next step</li>
+        <li>Build a differentiable kinematics model from paired video + IMU</li>
+      </ul>
+      <div class="stat-row">
+        <div class="stat"><span class="val">1,274 h</span><span class="key">Egocentric video (9 TB)</span></div>
+        <div class="stat"><span class="val">9.5 GB</span><span class="key">Paired IMU data</span></div>
+        <div class="stat"><span class="val">7</span><span class="key">Body sensors</span></div>
+        <div class="stat"><span class="val">13k</span><span class="key">Recordings</span></div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE: Dataset Visuals ── -->
+  <section class="slide" id="s9-data">
+    <div class="slide-label">Data · Samples</div>
+    <h2>What the Data Looks Like</h2>
+    <div class="slide-body" style="padding:0.5rem 0;">
+    <div style="display:flex;gap:1.4rem;width:100%;height:100%;align-items:stretch;">
+
+      <!-- LEFT column: stacked egocentric POV + IMU waveforms -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:0.7rem;min-width:0;">
+        <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dimmer);">Egocentric POV</div>
+        <img src="assets/dataset_sample.png" alt="Egocentric POV frames"
+          style="width:100%;border-radius:10px;border:1px solid var(--border-accent);object-fit:cover;flex:1;min-height:0;">
+
+        <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dimmer);">IMU · accel + orientation (chest)</div>
+        <img src="assets/data_preview.gif" alt="Live IMU data"
+          style="width:100%;border-radius:10px;border:1px solid var(--border-accent);object-fit:cover;flex:1;min-height:0;">
+      </div>
+
+      <!-- RIGHT column: body pose animation — full height -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:0.7rem;min-width:0;">
+        <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dimmer);">7-sensor body pose</div>
+        <img src="assets/imu_body_anim.gif" alt="IMU body pose animation"
+          style="width:100%;height:100%;border-radius:10px;border:1px solid var(--border-accent);object-fit:contain;flex:1;min-height:0;">
+      </div>
+
+    </div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 10: Dataset Characteristics ── -->
+  <section class="slide" id="s10">
+    <div class="slide-label">Data · Characteristics</div>
+    <h2>Characteristics</h2>
+    <div class="slide-body">
+    <ul class="bullets">
+      <li>Egocentric body-position tracking: left hand, left forearm, left shoulder, right hand, right forearm, right shoulder, and chest — all in quaternions</li>
+      <li>
+        Size
+        <ul class="bullets" style="margin-top:0.5rem;">
+          <li class="sub">1,274 hours of egocentric video data (9 TB)</li>
+          <li class="sub">9.5 GB of paired IMU data points</li>
+        </ul>
+      </li>
+    </ul>
+    <div style="margin-top:2rem;width:100%;background:var(--surface2);border:1px solid var(--border-accent);border-radius:8px;padding:1rem 1.4rem;font-family:var(--mono);font-size:0.72rem;color:var(--text-dimmer);">
+      Quaternion representation preserves gimbal-lock-free rotation space — well-suited for differentiable forward kinematics
+    </div>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 11: Stretch Goals ── -->
+  <section class="slide" id="s11">
+    <div class="slide-label">Stretch Goals</div>
+    <h2>Stretch Goals</h2>
+    <div class="slide-body">
+    <div class="quote-block">
+      <p>"How can we create a differentiable representation of the physical state in this data from latent representations that are similar across all embodied models?"</p>
+    </div>
+    <ul class="bullets">
+      <li>Test on hardware — benchmark against current paradigms</li>
+      <li class="sub">Could this enable faster training?</li>
+      <li class="sub">Better hardware transfer: same model to different robotic setups?</li>
+    </ul>
+    </div>
+  </section>
+
+  <!-- ── SLIDE 12: Questions ── -->
+  <section class="slide center-all" id="s12">
+    <div class="q-big">Questions?</div>
+    <p style="font-family:var(--mono);font-size:0.75rem;color:var(--text-dimmer);margin-top:2.4rem;letter-spacing:0.08em;">Vishesh Narayan &nbsp;·&nbsp; Arjun Mudda &nbsp;·&nbsp; CMSC838</p>
+  </section>
+
+</div>
+
+<!-- ── NAV ── -->
+<div id="nav">
+  <button id="btn-prev" title="Previous">←</button>
+  <span id="slide-counter">01 / 12</span>
+  <button id="btn-next" title="Next">→</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let cur = 0;
+
+  const progressEl = document.getElementById('progress');
+  const counterEl  = document.getElementById('slide-counter');
+
+  // ── Timer pool ────────────────────────────────────────────────────
+  let activeTimers = [];
+  let activeRafs   = [];
+  function sched(fn, ms) { activeTimers.push(setTimeout(fn, ms)); }
+  function clearAllTimers() {
+    activeTimers.forEach(clearTimeout);  activeTimers = [];
+    activeRafs.forEach(cancelAnimationFrame); activeRafs = [];
+  }
+
+  // ── SIGReg canvas animation ───────────────────────────────────────
+  function runSigRegAnim() {
+    const canvas = document.getElementById('sigreg-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const cx = W / 2, cy = H / 2;
+    const SPREAD = Math.min(W, H) * 0.32;
+
+    // Box-Muller
+    function randn() {
+      const u = Math.random() || 1e-9, v = Math.random() || 1e-9;
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    const N = 28;
+    // Target: Gaussian cloud, slightly offset per group for visual clarity
+    const pts1 = Array.from({length: N}, () => ({
+      sx: randn() * 5, sy: randn() * 5,
+      tx: randn() * SPREAD * 0.42 - SPREAD * 0.08,
+      ty: randn() * SPREAD * 0.42,
+    }));
+    const pts2 = Array.from({length: N}, () => ({
+      sx: randn() * 5, sy: randn() * 5,
+      tx: randn() * SPREAD * 0.42 + SPREAD * 0.08,
+      ty: randn() * SPREAD * 0.42,
+    }));
+
+    const HOLD = 800;        // ms collapsed before spreading
+    const SPREAD_DUR = 2200; // ms to spread
+    const PROJ_DELAY = HOLD + SPREAD_DUR + 300;
+    let startTime = null;
+    let projAngle = 0;
+
+    function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+    function lerp(a, b, t) { return a + (b-a)*t; }
+
+    function getCSSVar(v) {
+      return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+    }
+
+    function frame(ts) {
+      if (!startTime) startTime = ts;
+      const el = ts - startTime;
+
+      const isLight = document.documentElement.classList.contains('light');
+      const bg   = isLight ? '#f5f4f0' : '#0a0a0a';
+      const ring = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.04)';
+      const axis = isLight ? 'rgba(0,0,0,0.1)'  : 'rgba(255,255,255,0.08)';
+
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // Gaussian contour rings
+      for (const r of [SPREAD*0.28, SPREAD*0.55, SPREAD*0.82, SPREAD*1.1]) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.strokeStyle = ring;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Axis crosshairs
+      ctx.strokeStyle = axis;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(cx, cy - H*0.44); ctx.lineTo(cx, cy + H*0.44); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx - W*0.44, cy); ctx.lineTo(cx + W*0.44, cy); ctx.stroke();
+
+      // Spread progress
+      let t = 0;
+      if (el > HOLD) t = Math.min(1, (el - HOLD) / SPREAD_DUR);
+      t = ease(t);
+
+      // Projection line (appears after spreading)
+      if (el > PROJ_DELAY) {
+        const pAlpha = Math.min(1, (el - PROJ_DELAY) / 600);
+        projAngle += 0.006;
+        const px = Math.cos(projAngle), py = Math.sin(projAngle);
+        const len = Math.max(W, H);
+        ctx.save();
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = `rgba(212,168,83,${pAlpha * 0.55})`;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(cx - px*len, cy - py*len);
+        ctx.lineTo(cx + px*len, cy + py*len);
+        ctx.stroke();
+        ctx.restore();
+
+        // Project the points onto this line and draw a small 1D histogram strip
+        const allPts = [...pts1.map(p => ({
+          x: lerp(p.sx, p.tx, t), y: lerp(p.sy, p.ty, t), col: 0
+        })), ...pts2.map(p => ({
+          x: lerp(p.sx, p.tx, t), y: lerp(p.sy, p.ty, t), col: 1
+        }))];
+        allPts.forEach(p => {
+          const proj = p.x * px + p.y * py;
+          const ox = cx + px*proj + py * (H*0.38);
+          const oy = cy + py*proj - px * (H*0.38);
+          ctx.beginPath();
+          ctx.arc(ox, oy, 2, 0, Math.PI*2);
+          ctx.fillStyle = p.col === 0
+            ? `rgba(212,168,83,${pAlpha * 0.7})`
+            : `rgba(124,111,205,${pAlpha * 0.7})`;
+          ctx.fill();
+        });
+      }
+
+      // Draw points
+      const drawPts = (pts, color) => {
+        pts.forEach(p => {
+          const x = cx + lerp(p.sx, p.tx, t);
+          const y = cy + lerp(p.sy, p.ty, t);
+          ctx.beginPath();
+          ctx.arc(x, y, 3.8, 0, Math.PI*2);
+          ctx.fillStyle = color;
+          ctx.fill();
+        });
+      };
+      drawPts(pts1, 'rgba(212,168,83,0.88)');
+      drawPts(pts2, 'rgba(124,111,205,0.88)');
+
+      // Label
+      const lbl = document.getElementById('sigreg-anim-label');
+      if (lbl) {
+        if (t < 0.05) lbl.textContent = 'collapsed — trivial solution, no information';
+        else if (t < 0.95) lbl.textContent = 'SIGReg pushing embeddings toward N(0,1)…';
+        else if (el <= PROJ_DELAY) lbl.textContent = '▶  Gaussian spread achieved';
+        else lbl.textContent = '∇  projection v shows 1D marginals approaching N(0,1)';
+      }
+
+      // Legend
+      ctx.font = `${Math.round(W * 0.032)}px "JetBrains Mono", monospace`;
+      ctx.fillStyle = 'rgba(212,168,83,0.8)'; ctx.fillText('● z_t', 12, H - 22);
+      ctx.fillStyle = 'rgba(124,111,205,0.8)'; ctx.fillText('● z_{t+1}', 12, H - 8);
+
+      activeRafs.push(requestAnimationFrame(frame));
+    }
+
+    activeRafs.push(requestAnimationFrame(frame));
+  }
+
+  // ── Generic helpers ───────────────────────────────────────────────
+  function setLabel(id, text, cls) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.className = 'anim-pass-label' + (cls ? ' ' + cls : '');
+  }
+  function setCaption(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+  function badge(id, on) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('visible', on);
+  }
+
+  // Lights up a set of node/arrow IDs as forward (amber) or backward (purple)
+  // mode: 'fwd' | 'bwd' | 'stop'
+  function pulse(ids, mode) {
+    const activeClass = mode === 'bwd' ? 'grad-node' : mode === 'stop' ? 'stop-node' : 'active-node';
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('lit');
+      el.classList.add(activeClass);
+      setTimeout(() => el.classList.remove(activeClass), 650);
+    });
+  }
+
+  // Reset all anode/aarrow/loss-pill inside a slide to dim
+  function clearSlide(slideId) {
+    const slide = document.getElementById(slideId);
+    if (!slide) return;
+    slide.querySelectorAll('.anode,.aarrow,.loss-pill').forEach(el =>
+      el.classList.remove('lit','active-node','grad-node','stop-node'));
+    ['frozen-badge','stop-badge','anim-pass-label'].forEach(cls =>
+      slide.querySelectorAll('.' + cls).forEach(el => {
+        el.classList.remove('visible','fwd','bwd','stop');
+        if (el.classList.contains('anim-pass-label')) el.textContent = '—';
+      }));
+    // special: grad arrow for e2e
+    const ga = document.getElementById('e2e-grad-arrow');
+    if (ga) { ga.style.opacity = '0.08'; ga.style.color = ''; }
+  }
+
+  // ── LEWM animation (slide s3) — plays once, stays lit ─────────────
+  const LEWM_FWD = [
+    ['an-ot','an-ot1'],
+    ['an-vit1','an-vit2','aa-1','aa-6'],
+    ['an-zt','an-zt1','aa-2','aa-7'],
+    ['an-at','aa-4'],
+    ['an-trans','aa-3'],
+    ['an-guess','aa-5','lp-mse'],
+    ['lp-sig'],
+  ];
+
+  function runLeWMAnim() {
+    clearSlide('s3');
+    const S = 680, P = 1000;
+    const lbl = document.getElementById('lewm-pass-label');
+    if (lbl) { lbl.innerHTML = '▶&nbsp;&nbsp;forward pass'; lbl.className = 'anim-pass-label fwd'; }
+    LEWM_FWD.forEach((ids, i) => sched(() => pulse(ids, 'fwd'), i * S));
+    const bwdStart = LEWM_FWD.length * S + P;
+    sched(() => {
+      if (lbl) { lbl.innerHTML = '∇&nbsp;&nbsp;backward &nbsp;(gradient)'; lbl.className = 'anim-pass-label bwd'; }
+    }, bwdStart);
+    [...LEWM_FWD].reverse().forEach((ids, i) =>
+      sched(() => pulse(ids, 'bwd'), bwdStart + 150 + i * S));
+    // final state — leave label as ∇, everything stays lit
+    sched(() => {
+      if (lbl) { lbl.innerHTML = '∇&nbsp;&nbsp;gradient complete'; lbl.className = 'anim-pass-label bwd'; }
+    }, bwdStart + 150 + LEWM_FWD.length * S);
+  }
+
+  // ── Stop Gradient animation (slide s7) — plays once, stays lit ────
+  const SG_FWD = [
+    ['sg-ot','sg-ot1'],
+    ['sg-vit1','sg-vit2','sg-a1','sg-a6'],
+    ['sg-zt','sg-zt1','sg-a2','sg-a7'],
+    ['sg-sensor','sg-a3'],
+    ['sg-pred','sg-a4'],
+    ['sg-zhat'],
+    ['sg-mlp','sg-a5'],
+    ['sg-phys','sg-a8'],
+    ['sg-ot1gt','sg-a9','sg-loss','sg-loss2'],
+  ];
+  const SG_BWD = [
+    ['sg-loss','sg-loss2'],
+    ['sg-phys'],
+    ['sg-mlp'],
+    ['sg-zhat'],
+  ];
+
+  function runStopGradAnim() {
+    clearSlide('s7');
+    badge('sg-frozen', false); badge('sg-stop', false);
+    const S = 580, P = 900;
+    setLabel('sg-pass-label', '▶\u00A0\u00A0forward pass', 'fwd');
+    setCaption('sg-caption', 'Forward pass through frozen LeWM → physics probe');
+    SG_FWD.forEach((ids, i) => sched(() => pulse(ids, 'fwd'), i * S));
+    const bwdStart = SG_FWD.length * S + P;
+    sched(() => {
+      setLabel('sg-pass-label', '∇\u00A0\u00A0backward  (gradient)', 'bwd');
+      setCaption('sg-caption', 'Gradient flows back through probe — stops at LeWM boundary');
+    }, bwdStart);
+    SG_BWD.forEach((ids, i) => sched(() => pulse(ids, 'bwd'), bwdStart + 150 + i * S));
+    // final: show stop badges, leave lit
+    sched(() => {
+      badge('sg-stop', true); badge('sg-frozen', true);
+      setLabel('sg-pass-label', '∇\u00A0\u00A0gradient blocked', 'stop');
+      setCaption('sg-caption', 'LeWM is frozen — probe trains independently on kinematics loss');
+    }, bwdStart + 150 + SG_BWD.length * S);
+  }
+
+  // ── End-to-End animation (slide s8) — plays once, stays lit ───────
+  const E2E_FWD = [
+    ['e2e-ot','e2e-ot1'],
+    ['e2e-vit1','e2e-vit2','e2e-a1','e2e-a6'],
+    ['e2e-zt','e2e-zt1','e2e-a2','e2e-a7'],
+    ['e2e-sensor','e2e-a3'],
+    ['e2e-pred','e2e-a4'],
+    ['e2e-zhat'],
+    ['e2e-mlp','e2e-a5'],
+    ['e2e-phys','e2e-a8'],
+    ['e2e-ot1gt','e2e-a9','e2e-loss','e2e-loss2'],
+  ];
+  const E2E_BWD = [
+    ['e2e-loss','e2e-loss2'],
+    ['e2e-phys'],
+    ['e2e-mlp'],
+    ['e2e-zhat'],
+    ['e2e-pred','e2e-a4'],
+    ['e2e-zt','e2e-sensor'],
+    ['e2e-vit1','e2e-vit2'],
+    ['e2e-ot','e2e-ot1'],
+  ];
+
+  function runE2EAnim() {
+    clearSlide('s8');
+    const S = 540, P = 900;
+    setLabel('e2e-pass-label', '▶\u00A0\u00A0forward pass', 'fwd');
+    setCaption('e2e-caption', 'Forward pass through LeWM and physics probe');
+    E2E_FWD.forEach((ids, i) => sched(() => pulse(ids, 'fwd'), i * S));
+    const bwdStart = E2E_FWD.length * S + P;
+    sched(() => {
+      setLabel('e2e-pass-label', '∇\u00A0\u00A0backward  (gradient)', 'bwd');
+      setCaption('e2e-caption', 'Gradient from physics probe flows all the way back into LeWM');
+      const ga = document.getElementById('e2e-grad-arrow');
+      if (ga) { ga.style.opacity = '1'; ga.style.color = 'var(--accent2)'; }
+    }, bwdStart);
+    E2E_BWD.forEach((ids, i) => sched(() => pulse(ids, 'bwd'), bwdStart + 150 + i * S));
+    // final state
+    sched(() => {
+      setLabel('e2e-pass-label', '∇\u00A0\u00A0gradient complete', 'bwd');
+      setCaption('e2e-caption', 'Physics probe shapes LeWM latents to be action-sensitive and physically grounded');
+    }, bwdStart + 150 + E2E_BWD.length * S);
+  }
+
+  // ── Grounding animation (slide s-grounding) — plays once, stays lit
+  const GR_FWD = [
+    ['gr-lewm'],
+    ['gr-z'],
+    ['gr-probe','gr-a0'],
+    ['gr-big','gr-a-out'],
+    ['gr-robot-a'],
+    ['gr-robot-b'],
+    ['gr-robot-c'],
+    ['gr-b1','gr-b2','gr-b3'],
+  ];
+  const GR_BWD = [
+    ['gr-robot-a','gr-robot-b','gr-robot-c'],
+    ['gr-big'],
+    ['gr-probe','gr-a-out'],
+    ['gr-lewm','gr-z','gr-a0'],
+  ];
+
+  function runGroundingAnim() {
+    clearSlide('s-grounding');
+    const S = 620, P = 1000;
+    setLabel('gr-pass-label', '▶\u00A0\u00A0forward  →  latents to grounding', 'fwd');
+    setCaption('gr-caption', 'LeWM learns general latents once — physics probe adapts them per robot');
+    GR_FWD.forEach((ids, i) => sched(() => pulse(ids, 'fwd'), i * S));
+    const bwdStart = GR_FWD.length * S + P;
+    sched(() => {
+      setLabel('gr-pass-label', '∇\u00A0\u00A0gradient  ←  probe trains per robot', 'bwd');
+      setCaption('gr-caption', 'Only retrain the probe — LeWM backbone transfers across all robotic setups');
+    }, bwdStart);
+    GR_BWD.forEach((ids, i) => sched(() => pulse(ids, 'bwd'), bwdStart + 150 + i * S));
+    // final state
+    sched(() => {
+      setLabel('gr-pass-label', '∇\u00A0\u00A0gradient complete', 'bwd');
+      setCaption('gr-caption', 'Same backbone, different physics probes — fast transfer to any robotic setup');
+    }, bwdStart + 150 + GR_BWD.length * S);
+  }
+
+  // ── Animated slide registry ───────────────────────────────────────
+  const ANIM = {
+    's3':          runLeWMAnim,
+    's-sigreg':    runSigRegAnim,
+    's7':          runStopGradAnim,
+    's8':          runE2EAnim,
+    's-grounding': runGroundingAnim,
+  };
+
+  // ── Navigation ────────────────────────────────────────────────────
+  function go(to) {
+    if (to < 0 || to >= total) return;
+    clearAllTimers();
+    clearSlide(slides[cur].id);
+    slides[cur].classList.remove('active');
+    slides[cur].classList.add('exit-up');
+    setTimeout(() => slides[cur].classList.remove('exit-up'), 450);
+    cur = to;
+    slides[cur].classList.add('active');
+    if (ANIM[slides[cur].id]) ANIM[slides[cur].id]();
+    progressEl.style.width = ((cur + 1) / total * 100) + '%';
+    counterEl.textContent = String(cur + 1).padStart(2,'0') + ' / ' + String(total).padStart(2,'0');
+  }
+
+  document.getElementById('btn-next').addEventListener('click', () => go(cur + 1));
+  document.getElementById('btn-prev').addEventListener('click', () => go(cur - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    if (e.key === 'ArrowLeft')                   { e.preventDefault(); go(cur - 1); }
+  });
+
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const isLight = document.documentElement.classList.toggle('light');
+    document.getElementById('theme-toggle').textContent = isLight ? '◐' : '◑';
+  });
+
+  progressEl.style.width = (1 / total * 100) + '%';
+</script>
+</body>
+</html>
