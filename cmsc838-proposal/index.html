@@ -16,8 +16,8 @@
     --border: #222222;
     --border-accent: #2a2a2a;
     --text: #e8e8e8;
-    --text-dim: #888888;
-    --text-dimmer: #444444;
+    --text-dim: #b0b0b0;
+    --text-dimmer: #a0a0a0;
     --accent: #d4a853;
     --accent2: #7c6fcd;
     --accent3: #4a9eff;
@@ -47,11 +47,11 @@
     --border: #d0cfc8;
     --border-accent: #bdbcb4;
     --text: #1a1a18;
-    --text-dim: #666660;
-    --text-dimmer: #a0a098;
-    --accent: #b8861e;
+    --text-dim: #50504a;
+    --text-dimmer: #585850;
+    --accent: #805b13;
     --accent2: #5a4fb0;
-    --accent3: #2a7ee8;
+    --accent3: #205ca8;
     /* diagram box tokens — light */
     --box-bg:     #eceae2;
     --box-bd:     #c0bfb0;
@@ -126,7 +126,7 @@
 
   /* ── animated node system ── */
   .anode {
-    opacity: 0.12;
+    opacity: 1;
     transform: scale(0.96);
     transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
     pointer-events: none;
@@ -151,17 +151,81 @@
   .aarrow.active-node { opacity: 1; color: var(--accent); }
   .aarrow.grad-node   { opacity: 1; color: var(--accent2); }
 
-  #lewm-diagram {
+  .flow-diagram {
     width: 100%;
-    position: relative;
-    display: grid;
-    grid-template-columns: auto auto auto auto auto auto auto auto auto;
-    grid-template-rows: auto 1.4rem auto 1.2rem auto;
-    align-items: center;
-    justify-items: start;
-    gap: 0 0.3rem;
-    margin: 1rem 0;
+    max-height: 55vh;
+    margin: 0.4rem 0 1rem;
+    overflow: visible;
   }
+  .flow-diagram .lane {
+    fill: var(--surface);
+    stroke: var(--border);
+  }
+  .flow-diagram .lane-label {
+    fill: var(--text-dim);
+    font: 11px var(--mono);
+    letter-spacing: 2px;
+  }
+  .flow-diagram .anode { opacity: 1; transform: none; }
+  .flow-diagram .anode.lit { opacity: 1; }
+  .flow-diagram .anode rect {
+    fill: var(--surface2);
+    stroke: var(--border-accent);
+    stroke-width: 1.5;
+    transition: stroke 0.5s, fill 0.5s;
+  }
+  .flow-diagram .model rect { fill: var(--box-hi-bg); stroke: var(--box-hi-bd); }
+  .flow-diagram .loss rect { fill: var(--box-bg); stroke: var(--box-bd); }
+  .flow-diagram .anode.active-node,
+  .flow-diagram .anode.grad-node { box-shadow: none; }
+  .flow-diagram .active-node rect { stroke: var(--accent); stroke-width: 2.5; }
+  .flow-diagram .grad-node rect { stroke: var(--accent2); stroke-width: 2.5; }
+  .flow-diagram .node-title { fill: var(--text); font: 500 18px var(--sans); }
+  .flow-diagram .node-detail { fill: var(--text-dim); font: 11px var(--mono); }
+  .flow-diagram .aarrow {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    color: var(--text-dim);
+    opacity: 0.3;
+    marker-end: url(#lewm-arrow);
+  }
+  .flow-diagram .aarrow.lit { opacity: 0.65; }
+  .flow-diagram .aarrow.active-node,
+  .flow-diagram .aarrow.grad-node {
+    opacity: 1;
+    stroke-width: 3;
+    stroke-dasharray: 8 5;
+    animation: lewm-flow 1.6s linear infinite;
+  }
+  .flow-diagram .aarrow.active-node { color: var(--accent); }
+  .flow-diagram .aarrow.grad-node {
+    color: var(--accent2);
+    marker-end: none;
+    marker-start: url(#lewm-arrow);
+    animation-direction: reverse;
+  }
+  .flow-diagram .boundary { stroke: var(--accent3); stroke-width: 1.5; stroke-dasharray: 5 6; }
+  .flow-diagram .stop-node rect { stroke: #c44; stroke-width: 3; }
+  .flow-diagram .aarrow.stop-node { color: #c44; opacity: 1; }
+  .flow-diagram .frozen-note { fill: var(--accent3); font: 11px var(--mono); }
+  @keyframes lewm-flow { to { stroke-dashoffset: -26; } }
+  .lewm-legend {
+    display: flex;
+    gap: 1.6rem;
+    color: var(--text-dim);
+    font: 0.65rem var(--mono);
+    margin-bottom: 0.5rem;
+  }
+  .lewm-legend span::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 3px;
+    margin: 0 7px 3px 0;
+    background: var(--accent);
+  }
+  .lewm-legend span:last-child::before { background: var(--accent2); }
 
   #lewm-caption {
     min-height: 2.2rem;
@@ -203,7 +267,7 @@
     border: 1px solid var(--border-accent);
     color: var(--text-dim);
     background: var(--surface2);
-    opacity: 0.1;
+    opacity: 1;
     transition: opacity 0.4s ease, border-color 0.4s ease, color 0.4s ease;
   }
   .loss-pill.lit { opacity: 1; }
@@ -506,6 +570,9 @@
     transition: background 0.3s, border-color 0.3s, color 0.3s;
   }
 
+  #s4 .formula { padding: 0.7rem 1.2rem; font-size: 1rem; line-height: 1.6; margin: 0; }
+  #s4 .flow-diagram { max-height: 30vh; }
+
   .formula-note {
     font-family: var(--mono);
     font-size: 0.7rem;
@@ -718,12 +785,26 @@
     line-height: 1.6;
     color: var(--text-dim);
   }
+  /* Episode demonstration: readable at presentation size in either theme. */
+  .episode-demo { gap: 0.7rem; }
+  .episode-meta { font: 0.7rem var(--mono); color: var(--text-dim); }
+  .episode-video { width: 100%; min-height: 0; max-height: 39vh; background: #15181f; border: 1px solid var(--border-accent); border-radius: 12px; }
+  .episode-columns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; width: 100%; }
+  .episode-columns p { font-size: clamp(0.65rem, 1vw, 0.85rem); color: var(--text-dim); line-height: 1.45; }
+  .episode-columns strong { display: block; color: var(--text); margin-bottom: 0.2rem; }
+  .episode-explainer { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.4rem; align-items: center; width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border-accent); border-radius: 12px; background: var(--surface); }
+  .episode-explainer p { font-size: clamp(0.7rem, 1vw, 0.9rem); line-height: 1.5; color: var(--text-dim); }
+  .episode-explainer strong { color: var(--text); }
+  .episode-explainer .flow-diagram { margin: 0; max-height: 12vh; }
+  .episode-footnote { width: 100%; color: var(--text-dim); font: 0.65rem var(--mono); line-height: 1.5; }
+  .episode-footnote a { color: var(--accent3); text-underline-offset: 3px; }
+
 </style>
 </head>
 <body>
 
 <div id="progress"></div>
-<div id="hint">SPACE / → to advance</div>
+<div id="hint">SPACE / → next step · ← back · SHIFT + ←/→ slide · R restart</div>
 <button id="theme-toggle" title="Toggle light/dark mode">◑</button>
 
 <div id="deck">
@@ -751,7 +832,7 @@
       <ul class="bullets">
         <li>Joint Embedded Predictive Architecture</li>
         <li>Planning is through latents</li>
-        <li>No reconstruction</li>
+        <li>No reconstruction loss in the world-model objective</li>
       </ul>
     </div>
     <div style="margin-top:2rem;width:100%;background:var(--surface2);border:1px solid var(--border-accent);border-radius:10px;padding:1.4rem;">
@@ -774,55 +855,91 @@
 
   <!-- ── SLIDE 3: LeWM Architecture (animated) ── -->
   <section class="slide" id="s3">
-    <div class="slide-label">Architecture · Forward Pass</div>
-    <h2 style="margin-bottom:1rem;">LeWM Forward Pass</h2>
+    <div class="slide-label">Architecture · Training cycle</div>
+    <h2 style="margin-bottom:1rem;">LeWM Forward &amp; Backward Pass</h2>
     <div class="slide-body">
 
-    <!--
-      Grid layout  (9 cols × 5 rows):
-      col: Ot  →  ViT  →  zt  →  Trans  →  guess
-      row1: O_t path
-      row2: spacer + vertical connector lines
-      row3: action a_t row
-      row4: spacer
-      row5: O_t+1 path
-    -->
-    <div id="lewm-diagram">
-
-      <!-- ROW 1: O_t → ViT → z_t → Transformer → guess z_t+1 -->
-      <div class="box anode" id="an-ot"    style="grid-column:1;grid-row:1;">O<sub style="font-size:0.7em">t</sub></div>
-      <span class="aarrow" id="aa-1"       style="grid-column:2;grid-row:1;padding:0 0.3rem;">→</span>
-      <div class="box anode" id="an-vit1"  style="grid-column:3;grid-row:1;">ViT</div>
-      <span class="aarrow" id="aa-2"       style="grid-column:4;grid-row:1;padding:0 0.3rem;">→</span>
-      <div class="box anode" id="an-zt"    style="grid-column:5;grid-row:1;">z<sub style="font-size:0.7em">t</sub></div>
-      <span class="aarrow" id="aa-3"       style="grid-column:6;grid-row:1;padding:0 0.3rem;">→</span>
-      <div class="box anode highlight" id="an-trans" style="grid-column:7;grid-row:1;grid-row-end:span 3;align-self:center;">
-        Transformer<br><span style="font-size:0.62em;color:var(--text-dimmer);">AdaLN on a<sub>t</sub></span>
-      </div>
-      <span class="aarrow" id="aa-5"       style="grid-column:8;grid-row:1;padding:0 0.3rem;align-self:center;grid-row-end:span 3;">→</span>
-      <div class="box anode" id="an-guess" style="grid-column:9;grid-row:1;grid-row-end:span 3;align-self:center;">
-        guess z<sub style="font-size:0.7em">t+1</sub>
-      </div>
-
-      <!-- ROW 3: a_t injected -->
-      <div class="box anode action" id="an-at" style="grid-column:3;grid-row:3;justify-self:center;">
-        a<sub style="font-size:0.7em">t</sub>
-      </div>
-      <span class="aarrow" id="aa-4" style="grid-column:4;grid-row:3;padding:0 0.3rem;">→→</span>
-
-      <!-- ROW 5: O_t+1 → ViT → z_t+1 -->
-      <div class="box anode" id="an-ot1"   style="grid-column:1;grid-row:5;">O<sub style="font-size:0.7em">t+1</sub></div>
-      <span class="aarrow" id="aa-6"       style="grid-column:2;grid-row:5;padding:0 0.3rem;">→</span>
-      <div class="box anode" id="an-vit2"  style="grid-column:3;grid-row:5;">ViT</div>
-      <span class="aarrow" id="aa-7"       style="grid-column:4;grid-row:5;padding:0 0.3rem;">→</span>
-      <div class="box anode" id="an-zt1"   style="grid-column:5;grid-row:5;">z<sub style="font-size:0.7em">t+1</sub><br><span style="font-size:0.62em;color:var(--text-dimmer);">actual</span></div>
-    </div>
-
-    <!-- Loss terms row -->
-    <div style="display:flex;gap:1rem;justify-content:center;margin-bottom:0.6rem;">
-      <span class="loss-pill" id="lp-mse">MSE( guess z<sub>t+1</sub>, actual z<sub>t+1</sub> )</span>
-      <span class="loss-pill" id="lp-sig">λ/2 · SigReg(z<sub>t</sub>) + SigReg(z<sub>t+1</sub>)</span>
-    </div>
+    <div class="lewm-legend"><span>Forward · representations</span><span>Backward · gradients</span></div>
+    <svg id="lewm-diagram" class="flow-diagram" viewBox="0 0 1120 430" role="img" aria-labelledby="lewm-title lewm-desc">
+      <title id="lewm-title">LeWM training flowchart</title>
+      <desc id="lewm-desc">Current and next observations pass through shared ViT encoders. The current latent and action feed a Transformer to predict the next latent. Prediction error and SIGReg provide the training losses. Gold paths show the forward pass; purple paths show gradients returning through the graph.</desc>
+      <defs>
+        <marker id="lewm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 1 1 L 9 5 L 1 9" fill="none" stroke="context-stroke" stroke-width="1.6"/>
+        </marker>
+      </defs>
+      <rect class="lane" x="5" y="10" width="1110" height="410" rx="20"/>
+      <text class="lane-label" x="30" y="42">01 / ENCODE</text>
+      <text class="lane-label" x="570" y="42">02 / PREDICT</text>
+      <text class="lane-label" x="955" y="42">03 / COMPARE</text>
+      <text class="node-detail" x="285" y="197" text-anchor="middle">shared weights</text>
+      <path class="aarrow" id="aa-1" d="M 170 112 H 220"/>
+      <path class="aarrow" id="aa-2" d="M 350 112 H 400"/>
+      <path class="aarrow" id="aa-3" d="M 510 112 H 570"/>
+      <path class="aarrow" id="aa-4" d="M 645 180 V 150"/>
+      <path class="aarrow" id="aa-5" d="M 720 112 H 775"/>
+      <path class="aarrow" id="aa-6" d="M 170 273 H 220"/>
+      <path class="aarrow" id="aa-7" d="M 350 273 H 400"/>
+      <path class="aarrow" id="aa-pred-loss" d="M 905 112 H 930 Q 940 112 940 122 V 167 Q 940 177 950 177 H 965"/>
+      <path class="aarrow" id="aa-target-loss" d="M 510 273 H 930 Q 940 273 940 263 V 197 Q 940 187 950 187 H 965"/>
+      <path class="aarrow" id="aa-sig-current" d="M 455 150 V 210 Q 455 220 465 220 H 535 Q 545 220 545 230 V 350 Q 545 360 555 360 H 595"/>
+      <path class="aarrow" id="aa-sig-target" d="M 455 311 V 370 Q 455 380 465 380 H 595"/>
+      <g class="anode " id="an-ot">
+        <rect x="30" y="74" width="140" height="76" rx="12"/>
+        <text class="node-title" x="100.0" y="109.0" text-anchor="middle">Oₜ</text>
+        <text class="node-detail" x="100.0" y="130.0" text-anchor="middle">current observation</text>
+      </g>
+      <g class="anode model" id="an-vit1">
+        <rect x="220" y="74" width="130" height="76" rx="12"/>
+        <text class="node-title" x="285.0" y="109.0" text-anchor="middle">ViT encoder</text>
+        <text class="node-detail" x="285.0" y="130.0" text-anchor="middle">fθ · shared</text>
+      </g>
+      <g class="anode " id="an-zt">
+        <rect x="400" y="74" width="110" height="76" rx="12"/>
+        <text class="node-title" x="455.0" y="109.0" text-anchor="middle">zₜ</text>
+        <text class="node-detail" x="455.0" y="130.0" text-anchor="middle">latent state</text>
+      </g>
+      <g class="anode model" id="an-trans">
+        <rect x="570" y="74" width="150" height="76" rx="12"/>
+        <text class="node-title" x="645.0" y="109.0" text-anchor="middle">Transformer</text>
+        <text class="node-detail" x="645.0" y="130.0" text-anchor="middle">AdaLN conditioning</text>
+      </g>
+      <g class="anode " id="an-at">
+        <rect x="590" y="180" width="110" height="62" rx="12"/>
+        <text class="node-title" x="645.0" y="208.0" text-anchor="middle">aₜ</text>
+        <text class="node-detail" x="645.0" y="229.0" text-anchor="middle">action</text>
+      </g>
+      <g class="anode " id="an-guess">
+        <rect x="775" y="74" width="130" height="76" rx="12"/>
+        <text class="node-title" x="840.0" y="109.0" text-anchor="middle">ẑₜ₊₁</text>
+        <text class="node-detail" x="840.0" y="130.0" text-anchor="middle">predicted latent</text>
+      </g>
+      <g class="anode " id="an-ot1">
+        <rect x="30" y="235" width="140" height="76" rx="12"/>
+        <text class="node-title" x="100.0" y="270.0" text-anchor="middle">Oₜ₊₁</text>
+        <text class="node-detail" x="100.0" y="291.0" text-anchor="middle">next observation</text>
+      </g>
+      <g class="anode model" id="an-vit2">
+        <rect x="220" y="235" width="130" height="76" rx="12"/>
+        <text class="node-title" x="285.0" y="270.0" text-anchor="middle">ViT encoder</text>
+        <text class="node-detail" x="285.0" y="291.0" text-anchor="middle">fθ · shared</text>
+      </g>
+      <g class="anode " id="an-zt1">
+        <rect x="400" y="235" width="110" height="76" rx="12"/>
+        <text class="node-title" x="455.0" y="270.0" text-anchor="middle">zₜ₊₁</text>
+        <text class="node-detail" x="455.0" y="291.0" text-anchor="middle">actual latent</text>
+      </g>
+      <g class="anode loss" id="lp-mse">
+        <rect x="965" y="145" width="125" height="76" rx="12"/>
+        <text class="node-title" x="1027.5" y="180.0" text-anchor="middle">MSE</text>
+        <text class="node-detail" x="1027.5" y="201.0" text-anchor="middle">prediction loss</text>
+      </g>
+      <g class="anode loss" id="lp-sig">
+        <rect x="595" y="330" width="290" height="66" rx="12"/>
+        <text class="node-title" x="740.0" y="360.0" text-anchor="middle">SIGReg</text>
+        <text class="node-detail" x="740.0" y="381.0" text-anchor="middle">regularize zₜ and zₜ₊₁</text>
+      </g>
+    </svg>
 
     <div id="lewm-caption">Shared ViT encoders · action-conditioned Transformer · no reconstruction</div>
     <div id="lewm-pass-label">—</div>
@@ -871,15 +988,76 @@
     <div class="slide-label">Training Objective</div>
     <h2>LeWM Objective Functions</h2>
     <div class="slide-body">
+
+    <svg class="flow-diagram" viewBox="0 0 1120 320" role="img" aria-labelledby="obj-title">
+      <title id="obj-title">Combine prediction and regularization losses</title>
+      <rect class="lane" x="5" y="5" width="1110" height="310" rx="20"/>
+      <text class="lane-label" x="35" y="35">01 / LOSS TERMS</text>
+      <text class="lane-label" x="370" y="35">02 / WEIGHT</text>
+      <text class="lane-label" x="715" y="35">03 / OPTIMIZE</text>
+      <path class="aarrow" id="obj-a1" d="M270 110 H640 V170 H715"/>
+      <path class="aarrow" id="obj-a2" d="M270 240 H370"/>
+      <path class="aarrow" id="obj-a3" d="M565 240 H640 V170"/>
+      <g class="anode loss" id="obj-prediction">
+      <rect x="35" y="75" width="235" height="70" rx="12"/>
+      <text class="node-title" x="152.5" y="107.0" text-anchor="middle">Prediction error</text>
+      <text class="node-detail" x="152.5" y="128.0" text-anchor="middle">MSE(ẑₜ₊₁, zₜ₊₁)</text>
+      </g>
+      <g class="anode loss" id="obj-regularizer">
+      <rect x="35" y="205" width="235" height="70" rx="12"/>
+      <text class="node-title" x="152.5" y="237.0" text-anchor="middle">SIGReg</text>
+      <text class="node-detail" x="152.5" y="258.0" text-anchor="middle">both latent batches</text>
+      </g>
+      <g class="anode " id="obj-weight">
+      <rect x="370" y="205" width="195" height="70" rx="12"/>
+      <text class="node-title" x="467.5" y="237.0" text-anchor="middle">Weight by λ/2</text>
+      <text class="node-detail" x="467.5" y="258.0" text-anchor="middle">regularization strength</text>
+      </g>
+      <g class="anode loss" id="obj-total">
+      <rect x="715" y="135" width="260" height="70" rx="12"/>
+      <text class="node-title" x="845.0" y="167.0" text-anchor="middle">Total objective</text>
+      <text class="node-detail" x="845.0" y="188.0" text-anchor="middle">prediction + regularization</text>
+      </g>
+      </svg>
     <div class="formula">
       MSE( <span class="f-box">actual z<sub>t+1</sub></span> , <span class="f-box">guess z<sub>t+1</sub></span> )
       <br>+<br>
       λ/2 · ( SigReg( <span class="f-box">z<sub>t</sub></span> ) + SigReg( <span class="f-box">z<sub>t+1</sub></span> ) )
     </div>
-    <p class="formula-note">
-      Note: batch size is critical for SigReg. This example assumes batch size = 1;<br>
-      in practice a larger batch is needed for stable normality estimation.
-    </p>
+<p class="formula-note">SIGReg uses a batch of embeddings; larger batches give more stable normality estimates.</p><div id="obj-caption" class="anim-caption"></div><div id="obj-pass-label" class="anim-pass-label">—</div>
+    </div>
+  </section>
+
+  <!-- LeWM validation example: decoder makes latent predictions visible. -->
+  <section class="slide" id="s-lewm-demo">
+    <div class="slide-label">LeWM in action · Validation example</div>
+    <h2>Seeing the world through latent predictions</h2>
+    <div class="slide-body episode-demo">
+      <p class="episode-meta">EPISODE 004649 · 3 context frames · 4 fps · world model + decoder: epoch 10</p>
+      <video id="lewm-episode-video" class="episode-video" controls muted loop playsinline preload="metadata" aria-label="LeWM comparison: recorded frames, decoded observed embeddings, decoded predictions, and a persistence baseline" aria-describedby="episode-video-description">
+        <source src="assets/episode_004649.mp4" type="video/mp4">
+        <a href="assets/episode_004649.mp4">Open the episode video</a>.
+      </video>
+      <div class="episode-columns" id="episode-video-description">
+        <p><strong>1 · Recorded frame</strong>The actual observation at each time.</p>
+        <p><strong>2 · Reconstructed observation</strong>A reconstruction head decodes the real projected embedding.</p>
+        <p><strong>3 · Predicted future</strong>The head decodes autoregressively predicted embeddings after the context frames.</p>
+        <p><strong>4 · Persistence baseline</strong>Repeat the last observed frame without predicting motion.</p>
+      </div>
+      <div class="episode-explainer">
+        <svg class="flow-diagram" viewBox="0 0 640 110" role="img" aria-labelledby="episode-decoder-title">
+          <title id="episode-decoder-title">Observed or predicted latent embeddings pass through a reconstruction head to produce a visible image.</title>
+          <path class="aarrow lit" d="M180 55 H230"/>
+          <path class="aarrow lit" d="M420 55 H470"/>
+          <g class="anode lit"><rect x="5" y="15" width="175" height="80" rx="12"/><text class="node-title" x="92" y="49" text-anchor="middle">z or ẑ</text><text class="node-detail" x="92" y="72" text-anchor="middle">projected embedding</text></g>
+          <g class="anode model lit"><rect x="230" y="15" width="190" height="80" rx="12"/><text class="node-title" x="325" y="49" text-anchor="middle">Reconstruction head</text><text class="node-detail" x="325" y="72" text-anchor="middle">latent → pixels</text></g>
+          <g class="anode lit"><rect x="470" y="15" width="165" height="80" rx="12"/><text class="node-title" x="552" y="49" text-anchor="middle">Decoded image</text><text class="node-detail" x="552" y="72" text-anchor="middle">visible prediction</text></g>
+        </svg>
+        <p><strong>The reconstruction head makes the learned representation visible.</strong> Decoding an observed embedding reveals what it retains; decoding a predicted embedding reveals the model’s imagined future. LeWM’s prediction objective operates in latent space; the decoder provides this pixel-space view.</p>
+      </div>
+      <p class="episode-footnote">This episode’s 30 future frames: mean pixel MSE <strong>0.0164</strong> predicted vs <strong>0.0464</strong> persistence (≈65% lower). Prediction error grows over the rollout.<br>
+        <a href="assets/episode_004649.png" target="_blank" rel="noopener">Inspect sampled frames</a> · <a href="assets/episode_004649.json" target="_blank" rel="noopener">Episode metrics</a>
+      </p>
     </div>
   </section>
 
@@ -888,41 +1066,68 @@
     <div class="slide-label">Motivation</div>
     <h2>SIGReg anti-collapse may not produce action-sensitive latents</h2>
     <div class="slide-body">
-    <div class="arch" style="gap:2rem;">
-      <div style="padding:1.2rem;border:1px solid var(--border-accent);border-radius:10px;background:var(--surface2);">
-        <div style="font-family:var(--mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dimmer);margin-bottom:0.8rem;">Same observation O<sub>t</sub></div>
-        <div class="arch-row">
-          <div class="box">O<sub style="font-size:0.7em">t</sub></div>
-          <span class="arrow">→</span>
-          <div class="box">ViT</div>
-          <span class="arrow">→</span>
-          <div class="box">z<sub style="font-size:0.7em">t</sub></div>
-          <span class="arrow">→</span>
-          <div class="box orange">DRIVE FORWARD</div>
-          <span class="arrow">→</span>
-          <div class="box highlight">Transformer</div>
-          <span class="arrow">→</span>
-          <div class="box">guess z<sub style="font-size:0.7em">t+1</sub></div>
-        </div>
-        <div style="height:0.8rem;"></div>
-        <div class="arch-row">
-          <div class="box">O<sub style="font-size:0.7em">t</sub></div>
-          <span class="arrow">→</span>
-          <div class="box">ViT</div>
-          <span class="arrow">→</span>
-          <div class="box">z<sub style="font-size:0.7em">t</sub></div>
-          <span class="arrow">→</span>
-          <div class="box orange">DRIVE BACKWARD</div>
-          <span class="arrow">→</span>
-          <div class="box highlight">Transformer</div>
-          <span class="arrow">→</span>
-          <div class="box">guess z<sub style="font-size:0.7em">t+1</sub></div>
-        </div>
-      </div>
-      <div style="font-family:var(--mono);font-size:0.8rem;color:var(--text-dim);padding:0.8rem 1.2rem;border-left:3px solid #c44;border-radius:4px;background:var(--surface2);">
-        These should produce completely different latents — yet LeWM does not guarantee they will diverge.
-      </div>
-    </div>
+
+    <svg class="flow-diagram" viewBox="0 0 1120 430" role="img" aria-labelledby="mot-title">
+      <title id="mot-title">The same observation with two different actions</title>
+      <rect class="lane" x="5" y="5" width="1110" height="420" rx="20"/>
+      <text class="lane-label" x="30" y="35">01 / SAME OBSERVATION</text>
+      <text class="lane-label" x="570" y="35">02 / DIFFERENT ACTIONS</text>
+      <text class="lane-label" x="850" y="35">03 / PREDICTIONS</text>
+      <path class="aarrow" id="mot-a1" d="M165 215 H215"/>
+      <path class="aarrow" id="mot-a2" d="M345 215 H395"/>
+      <path class="aarrow" id="mot-a3" d="M510 215 H535 V190 H570"/>
+      <path class="aarrow" id="mot-a4" d="M535 215 V290 H570"/>
+      <path class="aarrow" id="mot-act-a" d="M660 135 V155"/>
+      <path class="aarrow" id="mot-act-b" d="M660 345 V325"/>
+      <path class="aarrow" id="mot-out1" d="M750 190 H800 V165 H850"/>
+      <path class="aarrow" id="mot-out2" d="M750 290 H800 V295 H850"/>
+      <g class="anode " id="mot-obs">
+      <rect x="30" y="180" width="135" height="70" rx="12"/>
+      <text class="node-title" x="97.5" y="212.0" text-anchor="middle">Oₜ</text>
+      <text class="node-detail" x="97.5" y="233.0" text-anchor="middle">same observation</text>
+      </g>
+      <g class="anode model" id="mot-vit">
+      <rect x="215" y="180" width="130" height="70" rx="12"/>
+      <text class="node-title" x="280.0" y="212.0" text-anchor="middle">ViT encoder</text>
+      <text class="node-detail" x="280.0" y="233.0" text-anchor="middle">shared</text>
+      </g>
+      <g class="anode " id="mot-z">
+      <rect x="395" y="180" width="115" height="70" rx="12"/>
+      <text class="node-title" x="452.5" y="212.0" text-anchor="middle">zₜ</text>
+      <text class="node-detail" x="452.5" y="233.0" text-anchor="middle">same latent</text>
+      </g>
+      <g class="anode " id="mot-forward">
+      <rect x="570" y="65" width="180" height="70" rx="12"/>
+      <text class="node-title" x="660.0" y="97.0" text-anchor="middle">Drive forward</text>
+      <text class="node-detail" x="660.0" y="118.0" text-anchor="middle">action aₜ</text>
+      </g>
+      <g class="anode " id="mot-backward">
+      <rect x="570" y="345" width="180" height="70" rx="12"/>
+      <text class="node-title" x="660.0" y="377" text-anchor="middle">Drive backward</text>
+      <text class="node-detail" x="660.0" y="398" text-anchor="middle">action aₜ</text>
+      </g>
+      <g class="anode model" id="mot-pred-a">
+      <rect x="570" y="155" width="180" height="70" rx="12"/>
+      <text class="node-title" x="660.0" y="187" text-anchor="middle">Transformer</text>
+      <text class="node-detail" x="660.0" y="208" text-anchor="middle">condition on action</text>
+      </g>
+      <g class="anode model" id="mot-pred-b">
+      <rect x="570" y="255" width="180" height="70" rx="12"/>
+      <text class="node-title" x="660.0" y="287" text-anchor="middle">Transformer</text>
+      <text class="node-detail" x="660.0" y="308" text-anchor="middle">condition on action</text>
+      </g>
+      <g class="anode " id="mot-out-a">
+      <rect x="850" y="130" width="225" height="70" rx="12"/>
+      <text class="node-title" x="962.5" y="162.0" text-anchor="middle">Predicted latent</text>
+      <text class="node-detail" x="962.5" y="183.0" text-anchor="middle">forward action</text>
+      </g>
+      <g class="anode " id="mot-out-b">
+      <rect x="850" y="260" width="225" height="70" rx="12"/>
+      <text class="node-title" x="962.5" y="292.0" text-anchor="middle">Predicted latent</text>
+      <text class="node-detail" x="962.5" y="313.0" text-anchor="middle">backward action</text>
+      </g>
+      </svg>
+<div id="mot-caption" class="anim-caption"></div><div id="mot-pass-label" class="anim-pass-label">—</div>
     </div>
   </section>
 
@@ -947,62 +1152,93 @@
     <div class="slide-label">Architecture · Phase 1</div>
     <h2>Architecture with stop gradient</h2>
     <div class="slide-body">
-    <div style="display:flex;gap:1.6rem;width:100%;align-items:stretch;">
-
-      <!-- GREEN: LeWM Frozen -->
-      <div class="group-box green" style="flex:1.4;">
-        <div class="arch" style="gap:0.8rem;">
-          <div class="arch-row">
-            <div class="box anode" id="sg-ot">O<sub style="font-size:0.7em">t</sub></div>
-            <span class="aarrow" id="sg-a1">→</span>
-            <div class="box anode" id="sg-vit1">ViT</div>
-            <span class="aarrow" id="sg-a2">→</span>
-            <div class="box anode" id="sg-zt">z<sub style="font-size:0.7em">t</sub></div>
-          </div>
-          <div class="arch-row">
-            <div class="box anode" id="sg-ot1">O<sub style="font-size:0.7em">t+1</sub></div>
-            <span class="aarrow" id="sg-a6">→</span>
-            <div class="box anode" id="sg-vit2">ViT</div>
-            <span class="aarrow" id="sg-a7">→</span>
-            <div class="box anode" id="sg-zt1">z<sub style="font-size:0.7em">t+1</sub></div>
-          </div>
-          <div class="arch-row">
-            <div class="box anode" id="sg-sensor">sensor data</div>
-            <span class="aarrow" id="sg-a3">→</span>
-            <div class="box anode highlight" id="sg-pred">Predictor</div>
-            <span class="aarrow" id="sg-a4">→</span>
-            <div class="box anode" id="sg-zhat">ẑ<sub style="font-size:0.7em">t+1</sub></div>
-          </div>
-        </div>
-        <div id="sg-frozen" class="frozen-badge">⬡ frozen — no gradient enters</div>
-        <div class="group-label">LeWM Style (Frozen)</div>
-      </div>
-
-      <!-- PURPLE: Physics Prober -->
-      <div class="group-box purple" style="flex:1;">
-        <div class="arch" style="gap:0.8rem;">
-          <div class="arch-row">
-            <span class="aarrow" id="sg-a5">→</span>
-            <div class="box anode" id="sg-mlp">MLP</div>
-            <span class="aarrow" id="sg-a8">→</span>
-            <div class="box anode" id="sg-phys">Phys Eqns</div>
-          </div>
-          <div class="arch-row">
-            <div class="box anode" id="sg-loss">Loss Eqn</div>
-          </div>
-          <div class="arch-row">
-            <div class="box anode" id="sg-ot1gt">O<sub style="font-size:0.7em">t+1</sub></div>
-            <span class="aarrow" id="sg-a9">→</span>
-            <div class="box anode" id="sg-loss2">Loss Eqn</div>
-          </div>
-        </div>
-        <div id="sg-stop" class="stop-badge">◀ gradient stops here</div>
-        <div class="group-label">Physics Prober</div>
-      </div>
-    </div>
-
-    <div id="sg-caption" class="anim-caption">Physics probe trains to predict kinematics — LeWM weights stay frozen</div>
-    <div style="text-align:center;"><div id="sg-pass-label" class="anim-pass-label">—</div></div>
+<div class="lewm-legend"><span>Forward · representations</span><span>Backward · gradients</span></div>
+    <svg class="flow-diagram" viewBox="0 0 1120 470" role="img" aria-labelledby="sg-title">
+      <title id="sg-title">Frozen backbone and trainable physics probe</title>
+      <rect class="lane" x="5" y="5" width="1110" height="460" rx="20"/>
+      <text class="lane-label" x="30" y="35">01 / LEWM · FROZEN</text>
+      <text class="lane-label" x="600" y="35">02 / PHYSICS PROBE</text>
+      <path class="boundary" d="M560 55 V445"/>
+      <text class="frozen-note" x="600" y="94">FROZEN BACKBONE · GRADIENT STOPS AT BOUNDARY</text>
+      <path class="aarrow" id="sg-a1" d="M160 110 H210"/>
+      <path class="aarrow" id="sg-a2" d="M340 110 H390"/>
+      <path class="aarrow" id="sg-a3" d="M160 255 H210"/>
+      <path class="aarrow" id="sg-condition" d="M455 145 V180 Q455 190 445 190 H285 Q275 190 275 200 V220"/>
+      <path class="aarrow" id="sg-a4" d="M340 255 H390"/>
+      <path class="aarrow" id="sg-a5" d="M520 255 H600"/>
+      <path class="aarrow" id="sg-a8" d="M730 255 H780"/>
+      <path class="aarrow" id="sg-physics-loss" d="M910 255 H960"/>
+      <path class="aarrow" id="sg-a6" d="M160 400 H210"/>
+      <path class="aarrow" id="sg-a7" d="M340 400 H390"/>
+      <path class="aarrow" id="sg-target-loss" d="M520 400 H600"/>
+      <path class="aarrow" id="sg-pred-loss" d="M455 290 V325 Q455 335 465 335 H670 Q680 335 680 345 V365"/>
+      <g class="anode " id="sg-ot">
+      <rect x="30" y="75" width="130" height="70" rx="12"/>
+      <text class="node-title" x="95.0" y="107.0" text-anchor="middle">Oₜ</text>
+      <text class="node-detail" x="95.0" y="128.0" text-anchor="middle">observation</text>
+      </g>
+      <g class="anode model" id="sg-vit1">
+      <rect x="210" y="75" width="130" height="70" rx="12"/>
+      <text class="node-title" x="275.0" y="107.0" text-anchor="middle">ViT encoder</text>
+      <text class="node-detail" x="275.0" y="128.0" text-anchor="middle">visual features</text>
+      </g>
+      <g class="anode " id="sg-zt">
+      <rect x="390" y="75" width="130" height="70" rx="12"/>
+      <text class="node-title" x="455.0" y="107.0" text-anchor="middle">zₜ</text>
+      <text class="node-detail" x="455.0" y="128.0" text-anchor="middle">current latent</text>
+      </g>
+      <g class="anode " id="sg-sensor">
+      <rect x="30" y="220" width="130" height="70" rx="12"/>
+      <text class="node-title" x="95.0" y="252.0" text-anchor="middle">Sensor data</text>
+      <text class="node-detail" x="95.0" y="273.0" text-anchor="middle">current state</text>
+      </g>
+      <g class="anode model" id="sg-pred">
+      <rect x="210" y="220" width="130" height="70" rx="12"/>
+      <text class="node-title" x="275.0" y="252.0" text-anchor="middle">Predictor</text>
+      <text class="node-detail" x="275.0" y="273.0" text-anchor="middle">conditioned on zₜ</text>
+      </g>
+      <g class="anode " id="sg-zhat">
+      <rect x="390" y="220" width="130" height="70" rx="12"/>
+      <text class="node-title" x="455.0" y="252.0" text-anchor="middle">ẑₜ₊₁</text>
+      <text class="node-detail" x="455.0" y="273.0" text-anchor="middle">predicted latent</text>
+      </g>
+      <g class="anode model" id="sg-mlp">
+      <rect x="600" y="220" width="130" height="70" rx="12"/>
+      <text class="node-title" x="665.0" y="252.0" text-anchor="middle">MLP probe</text>
+      <text class="node-detail" x="665.0" y="273.0" text-anchor="middle">kinematic state</text>
+      </g>
+      <g class="anode model" id="sg-phys">
+      <rect x="780" y="220" width="130" height="70" rx="12"/>
+      <text class="node-title" x="845.0" y="252.0" text-anchor="middle">Physics</text>
+      <text class="node-detail" x="845.0" y="273.0" text-anchor="middle">differentiable FK</text>
+      </g>
+      <g class="anode loss" id="sg-loss">
+      <rect x="960" y="220" width="130" height="70" rx="12"/>
+      <text class="node-title" x="1025.0" y="252.0" text-anchor="middle">Physics loss</text>
+      <text class="node-detail" x="1025.0" y="273.0" text-anchor="middle">supervision</text>
+      </g>
+      <g class="anode " id="sg-ot1">
+      <rect x="30" y="365" width="130" height="70" rx="12"/>
+      <text class="node-title" x="95.0" y="397.0" text-anchor="middle">Oₜ₊₁</text>
+      <text class="node-detail" x="95.0" y="418.0" text-anchor="middle">next observation</text>
+      </g>
+      <g class="anode model" id="sg-vit2">
+      <rect x="210" y="365" width="130" height="70" rx="12"/>
+      <text class="node-title" x="275.0" y="397.0" text-anchor="middle">ViT encoder</text>
+      <text class="node-detail" x="275.0" y="418.0" text-anchor="middle">shared weights</text>
+      </g>
+      <g class="anode " id="sg-zt1">
+      <rect x="390" y="365" width="130" height="70" rx="12"/>
+      <text class="node-title" x="455.0" y="397.0" text-anchor="middle">zₜ₊₁</text>
+      <text class="node-detail" x="455.0" y="418.0" text-anchor="middle">target latent</text>
+      </g>
+      <g class="anode loss" id="sg-loss2">
+      <rect x="600" y="365" width="160" height="70" rx="12"/>
+      <text class="node-title" x="680.0" y="397.0" text-anchor="middle">Latent loss</text>
+      <text class="node-detail" x="680.0" y="418.0" text-anchor="middle">prediction vs target</text>
+      </g>
+      </svg>
+<div id="sg-caption" class="anim-caption"></div><div id="sg-pass-label" class="anim-pass-label">—</div>
     </div>
   </section>
 
@@ -1011,63 +1247,93 @@
     <div class="slide-label">Architecture · Phase 2</div>
     <h2>End to End Architecture</h2>
     <div class="slide-body">
-    <div style="display:flex;gap:1.6rem;width:100%;align-items:stretch;">
-
-      <!-- GREEN: LeWM (trainable) -->
-      <div class="group-box green" style="flex:1.4;">
-        <div class="arch" style="gap:0.8rem;">
-          <div class="arch-row">
-            <div class="box anode" id="e2e-ot">O<sub style="font-size:0.7em">t</sub></div>
-            <span class="aarrow" id="e2e-a1">→</span>
-            <div class="box anode" id="e2e-vit1">ViT</div>
-            <span class="aarrow" id="e2e-a2">→</span>
-            <div class="box anode" id="e2e-zt">z<sub style="font-size:0.7em">t</sub></div>
-          </div>
-          <div class="arch-row">
-            <div class="box anode" id="e2e-ot1">O<sub style="font-size:0.7em">t+1</sub></div>
-            <span class="aarrow" id="e2e-a6">→</span>
-            <div class="box anode" id="e2e-vit2">ViT</div>
-            <span class="aarrow" id="e2e-a7">→</span>
-            <div class="box anode" id="e2e-zt1">z<sub style="font-size:0.7em">t+1</sub></div>
-          </div>
-          <div class="arch-row">
-            <div class="box anode" id="e2e-sensor">sensor data</div>
-            <span class="aarrow" id="e2e-a3">→</span>
-            <div class="box anode highlight" id="e2e-pred">Predictor</div>
-            <span class="aarrow" id="e2e-a4">→</span>
-            <div class="box anode" id="e2e-zhat">ẑ<sub style="font-size:0.7em">t+1</sub></div>
-          </div>
-          <div class="arch-row" style="margin-top:0.2rem;">
-            <span class="aarrow" id="e2e-grad-arrow" style="font-size:0.8rem;letter-spacing:0.04em;opacity:0.08;transition:opacity 0.4s ease,color 0.4s ease;">◀── gradient flows back</span>
-          </div>
-        </div>
-        <div class="group-label">End-to-end (gradient flow back)</div>
-      </div>
-
-      <!-- PURPLE: Physics Prober -->
-      <div class="group-box purple" style="flex:1;">
-        <div class="arch" style="gap:0.8rem;">
-          <div class="arch-row">
-            <span class="aarrow" id="e2e-a5">→</span>
-            <div class="box anode" id="e2e-mlp">MLP</div>
-            <span class="aarrow" id="e2e-a8">→</span>
-            <div class="box anode" id="e2e-phys">Phys Eqns</div>
-          </div>
-          <div class="arch-row">
-            <div class="box anode" id="e2e-loss">Loss Eqn</div>
-          </div>
-          <div class="arch-row">
-            <div class="box anode" id="e2e-ot1gt">O<sub style="font-size:0.7em">t+1</sub></div>
-            <span class="aarrow" id="e2e-a9">→</span>
-            <div class="box anode" id="e2e-loss2">Loss Eqn</div>
-          </div>
-        </div>
-        <div class="group-label">Physics Prober</div>
-      </div>
-    </div>
-
-    <div id="e2e-caption" class="anim-caption">Physics probe gradient flows back through LeWM — shaping action-sensitive latents</div>
-    <div style="text-align:center;"><div id="e2e-pass-label" class="anim-pass-label">—</div></div>
+<div class="lewm-legend"><span>Forward · representations</span><span>Backward · gradients</span></div>
+    <svg class="flow-diagram" viewBox="0 0 1120 470" role="img" aria-labelledby="e2e-title">
+      <title id="e2e-title">End-to-end physics-grounded training</title>
+      <rect class="lane" x="5" y="5" width="1110" height="460" rx="20"/>
+      <text class="lane-label" x="30" y="35">01 / LEWM · TRAINABLE</text>
+      <text class="lane-label" x="600" y="35">02 / PHYSICS PROBE</text>
+      <path class="boundary" d="M560 55 V445"/>
+      <text class="frozen-note" x="600" y="94">JOINT TRAINING · GRADIENT CROSSES BOUNDARY</text>
+      <path class="aarrow" id="e2e-a1" d="M160 110 H210"/>
+      <path class="aarrow" id="e2e-a2" d="M340 110 H390"/>
+      <path class="aarrow" id="e2e-a3" d="M160 255 H210"/>
+      <path class="aarrow" id="e2e-condition" d="M455 145 V180 Q455 190 445 190 H285 Q275 190 275 200 V220"/>
+      <path class="aarrow" id="e2e-a4" d="M340 255 H390"/>
+      <path class="aarrow" id="e2e-a5" d="M520 255 H600"/>
+      <path class="aarrow" id="e2e-a8" d="M730 255 H780"/>
+      <path class="aarrow" id="e2e-physics-loss" d="M910 255 H960"/>
+      <path class="aarrow" id="e2e-a6" d="M160 400 H210"/>
+      <path class="aarrow" id="e2e-a7" d="M340 400 H390"/>
+      <path class="aarrow" id="e2e-target-loss" d="M520 400 H600"/>
+      <path class="aarrow" id="e2e-pred-loss" d="M455 290 V325 Q455 335 465 335 H670 Q680 335 680 345 V365"/>
+      <g class="anode " id="e2e-ot">
+      <rect x="30" y="75" width="130" height="70" rx="12"/>
+      <text class="node-title" x="95.0" y="107.0" text-anchor="middle">Oₜ</text>
+      <text class="node-detail" x="95.0" y="128.0" text-anchor="middle">observation</text>
+      </g>
+      <g class="anode model" id="e2e-vit1">
+      <rect x="210" y="75" width="130" height="70" rx="12"/>
+      <text class="node-title" x="275.0" y="107.0" text-anchor="middle">ViT encoder</text>
+      <text class="node-detail" x="275.0" y="128.0" text-anchor="middle">visual features</text>
+      </g>
+      <g class="anode " id="e2e-zt">
+      <rect x="390" y="75" width="130" height="70" rx="12"/>
+      <text class="node-title" x="455.0" y="107.0" text-anchor="middle">zₜ</text>
+      <text class="node-detail" x="455.0" y="128.0" text-anchor="middle">current latent</text>
+      </g>
+      <g class="anode " id="e2e-sensor">
+      <rect x="30" y="220" width="130" height="70" rx="12"/>
+      <text class="node-title" x="95.0" y="252.0" text-anchor="middle">Sensor data</text>
+      <text class="node-detail" x="95.0" y="273.0" text-anchor="middle">current state</text>
+      </g>
+      <g class="anode model" id="e2e-pred">
+      <rect x="210" y="220" width="130" height="70" rx="12"/>
+      <text class="node-title" x="275.0" y="252.0" text-anchor="middle">Predictor</text>
+      <text class="node-detail" x="275.0" y="273.0" text-anchor="middle">conditioned on zₜ</text>
+      </g>
+      <g class="anode " id="e2e-zhat">
+      <rect x="390" y="220" width="130" height="70" rx="12"/>
+      <text class="node-title" x="455.0" y="252.0" text-anchor="middle">ẑₜ₊₁</text>
+      <text class="node-detail" x="455.0" y="273.0" text-anchor="middle">predicted latent</text>
+      </g>
+      <g class="anode model" id="e2e-mlp">
+      <rect x="600" y="220" width="130" height="70" rx="12"/>
+      <text class="node-title" x="665.0" y="252.0" text-anchor="middle">MLP probe</text>
+      <text class="node-detail" x="665.0" y="273.0" text-anchor="middle">kinematic state</text>
+      </g>
+      <g class="anode model" id="e2e-phys">
+      <rect x="780" y="220" width="130" height="70" rx="12"/>
+      <text class="node-title" x="845.0" y="252.0" text-anchor="middle">Physics</text>
+      <text class="node-detail" x="845.0" y="273.0" text-anchor="middle">differentiable FK</text>
+      </g>
+      <g class="anode loss" id="e2e-loss">
+      <rect x="960" y="220" width="130" height="70" rx="12"/>
+      <text class="node-title" x="1025.0" y="252.0" text-anchor="middle">Physics loss</text>
+      <text class="node-detail" x="1025.0" y="273.0" text-anchor="middle">supervision</text>
+      </g>
+      <g class="anode " id="e2e-ot1">
+      <rect x="30" y="365" width="130" height="70" rx="12"/>
+      <text class="node-title" x="95.0" y="397.0" text-anchor="middle">Oₜ₊₁</text>
+      <text class="node-detail" x="95.0" y="418.0" text-anchor="middle">next observation</text>
+      </g>
+      <g class="anode model" id="e2e-vit2">
+      <rect x="210" y="365" width="130" height="70" rx="12"/>
+      <text class="node-title" x="275.0" y="397.0" text-anchor="middle">ViT encoder</text>
+      <text class="node-detail" x="275.0" y="418.0" text-anchor="middle">shared weights</text>
+      </g>
+      <g class="anode " id="e2e-zt1">
+      <rect x="390" y="365" width="130" height="70" rx="12"/>
+      <text class="node-title" x="455.0" y="397.0" text-anchor="middle">zₜ₊₁</text>
+      <text class="node-detail" x="455.0" y="418.0" text-anchor="middle">target latent</text>
+      </g>
+      <g class="anode loss" id="e2e-loss2">
+      <rect x="600" y="365" width="160" height="70" rx="12"/>
+      <text class="node-title" x="680.0" y="397.0" text-anchor="middle">Latent loss</text>
+      <text class="node-detail" x="680.0" y="418.0" text-anchor="middle">prediction vs target</text>
+      </g>
+      </svg>
+<div id="e2e-caption" class="anim-caption"></div><div id="e2e-pass-label" class="anim-pass-label">—</div>
     </div>
   </section>
 
@@ -1076,54 +1342,51 @@
     <div class="slide-label">Broader Vision</div>
     <h2>Physics Probe as Universal Grounding Layer</h2>
     <div class="slide-body">
-
-    <div style="display:flex;gap:1.2rem;width:100%;align-items:center;">
-
-      <!-- LEFT: LeWM -->
-      <div class="group-box green anode" id="gr-lewm" style="flex:0.75;padding:1rem 1.2rem;text-align:center;">
-        <div style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dimmer);margin-bottom:0.7rem;">LeWM</div>
-        <div class="box anode" id="gr-z" style="margin:0 auto 0.5rem;display:inline-block;">z<sub style="font-size:0.7em">t</sub>, z<sub style="font-size:0.7em">t+1</sub></div>
-        <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text-dimmer);">general latents<br>learned once</div>
-        <div class="group-label" style="bottom:-0.5rem;">Backbone</div>
-      </div>
-
-      <!-- MIDDLE: probe + arrow -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:0.6rem;flex-shrink:0;">
-        <span class="aarrow" id="gr-a0" style="font-size:1.1rem;">→</span>
-        <div class="box anode highlight" id="gr-probe" style="text-align:center;padding:0.7rem 1rem;">
-          Physics<br>Probe
-          <div style="font-size:0.58em;color:var(--text-dimmer);margin-top:0.3rem;">retrain per setup</div>
-        </div>
-        <span class="aarrow" id="gr-a-out" style="font-size:1.1rem;">→</span>
-      </div>
-
-      <!-- RIGHT: big purple Physical Grounding box -->
-      <div class="group-box purple anode" id="gr-big" style="flex:1.4;padding:1.1rem 1.3rem;">
-        <div style="font-family:var(--mono);font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dimmer);margin-bottom:0.8rem;">Physical Grounding</div>
-        <div class="arch" style="gap:0.65rem;">
-          <div class="arch-row">
-            <div class="box anode" id="gr-robot-a" style="flex:1;">Robot A &nbsp;<span style="color:var(--text-dimmer);font-size:0.7em">arm / manipulation</span></div>
-          </div>
-          <div class="arch-row">
-            <div class="box anode" id="gr-robot-b" style="flex:1;">Robot B &nbsp;<span style="color:var(--text-dimmer);font-size:0.7em">wearable / hand</span></div>
-          </div>
-          <div class="arch-row">
-            <div class="box anode" id="gr-robot-c" style="flex:1;">Robot C &nbsp;<span style="color:var(--text-dimmer);font-size:0.7em">mobile / whole-body</span></div>
-          </div>
-        </div>
-        <div class="group-label" style="bottom:-0.5rem;">Adaptable to any kinematics</div>
-      </div>
-    </div>
-
-    <!-- benefit pills -->
-    <div style="display:flex;gap:0.8rem;justify-content:center;margin-top:0.6rem;flex-wrap:wrap;">
-      <span class="loss-pill" id="gr-b1">Reuse trained latents — no full retraining</span>
-      <span class="loss-pill" id="gr-b2">Faster convergence per robot</span>
-      <span class="loss-pill" id="gr-b3">Physics regularises representation quality</span>
-    </div>
-
-    <div id="gr-caption" class="anim-caption">Same LeWM backbone — swap the physics probe to transfer to a new robot</div>
-    <div style="text-align:center;"><div id="gr-pass-label" class="anim-pass-label">—</div></div>
+<div class="lewm-legend"><span>Forward · representations</span><span>Backward · gradients</span></div>
+    <svg class="flow-diagram" viewBox="0 0 1120 410" role="img" aria-labelledby="gr-title">
+      <title id="gr-title">Transfer a shared backbone to different robot kinematics</title>
+      <rect class="lane" x="5" y="5" width="1110" height="400" rx="20"/>
+      <text class="lane-label" x="35" y="35">01 / REUSE</text>
+      <text class="lane-label" x="495" y="35">02 / ADAPT</text>
+      <text class="lane-label" x="805" y="35">03 / GROUND</text>
+      <path class="aarrow" id="gr-a0" d="M225 210 H280"/>
+      <path class="aarrow" id="gr-a1" d="M435 210 H495"/>
+      <path class="aarrow" id="gr-a-out" d="M685 210 H740"/>
+      <path class="aarrow" id="gr-a" d="M740 210 V115 Q740 105 750 105 H805"/>
+      <path class="aarrow" id="gr-b" d="M740 210 H805"/>
+      <path class="aarrow" id="gr-c" d="M740 210 V305 Q740 315 750 315 H805"/>
+      <g class="anode model" id="gr-lewm">
+      <rect x="35" y="175" width="190" height="70" rx="12"/>
+      <text class="node-title" x="130.0" y="207.0" text-anchor="middle">LeWM backbone</text>
+      <text class="node-detail" x="130.0" y="228.0" text-anchor="middle">general representations</text>
+      </g>
+      <g class="anode " id="gr-z">
+      <rect x="280" y="175" width="155" height="70" rx="12"/>
+      <text class="node-title" x="357.5" y="207.0" text-anchor="middle">Latent states</text>
+      <text class="node-detail" x="357.5" y="228.0" text-anchor="middle">zₜ and zₜ₊₁</text>
+      </g>
+      <g class="anode model" id="gr-probe">
+      <rect x="495" y="175" width="190" height="70" rx="12"/>
+      <text class="node-title" x="590.0" y="207.0" text-anchor="middle">Physics probe</text>
+      <text class="node-detail" x="590.0" y="228.0" text-anchor="middle">retrain per setup</text>
+      </g>
+      <g class="anode " id="gr-robot-a">
+      <rect x="805" y="70" width="260" height="70" rx="12"/>
+      <text class="node-title" x="935.0" y="102.0" text-anchor="middle">Robot A</text>
+      <text class="node-detail" x="935.0" y="123.0" text-anchor="middle">arm / manipulation</text>
+      </g>
+      <g class="anode " id="gr-robot-b">
+      <rect x="805" y="175" width="260" height="70" rx="12"/>
+      <text class="node-title" x="935.0" y="207.0" text-anchor="middle">Robot B</text>
+      <text class="node-detail" x="935.0" y="228.0" text-anchor="middle">wearable / hand</text>
+      </g>
+      <g class="anode " id="gr-robot-c">
+      <rect x="805" y="280" width="260" height="70" rx="12"/>
+      <text class="node-title" x="935.0" y="312.0" text-anchor="middle">Robot C</text>
+      <text class="node-detail" x="935.0" y="333.0" text-anchor="middle">mobile / whole-body</text>
+      </g>
+      </svg>
+<div style="display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;"><span class="loss-pill" id="gr-b1">Reuse trained latents</span><span class="loss-pill" id="gr-b2">Faster convergence per robot</span><span class="loss-pill" id="gr-b3">Physics-grounded representations</span></div><div id="gr-caption" class="anim-caption"></div><div id="gr-pass-label" class="anim-pass-label">—</div>
     </div>
   </section>
 
@@ -1225,9 +1488,9 @@
 
 <!-- ── NAV ── -->
 <div id="nav">
-  <button id="btn-prev" title="Previous">←</button>
+  <button id="btn-prev" title="Previous slide (Shift + Left)" aria-label="Previous slide">←</button>
   <span id="slide-counter">01 / 12</span>
-  <button id="btn-next" title="Next">→</button>
+  <button id="btn-next" title="Next slide (Shift + Right)" aria-label="Next slide">→</button>
 </div>
 
 <script>
@@ -1238,17 +1501,11 @@
   const progressEl = document.getElementById('progress');
   const counterEl  = document.getElementById('slide-counter');
 
-  // ── Timer pool ────────────────────────────────────────────────────
-  let activeTimers = [];
-  let activeRafs   = [];
-  function sched(fn, ms) { activeTimers.push(setTimeout(fn, ms)); }
-  function clearAllTimers() {
-    activeTimers.forEach(clearTimeout);  activeTimers = [];
-    activeRafs.forEach(cancelAnimationFrame); activeRafs = [];
-  }
-
   // ── SIGReg canvas animation ───────────────────────────────────────
+  let sigregFrame = null;
   function runSigRegAnim() {
+    if (sigregFrame !== null) cancelAnimationFrame(sigregFrame);
+    let startTime = null;
     const canvas = document.getElementById('sigreg-canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -1264,21 +1521,20 @@
 
     const N = 28;
     // Target: Gaussian cloud, slightly offset per group for visual clarity
-    const pts1 = Array.from({length: N}, () => ({
+    const pts1 = runSigRegAnim.pts1 ??= Array.from({length: N}, () => ({
       sx: randn() * 5, sy: randn() * 5,
       tx: randn() * SPREAD * 0.42 - SPREAD * 0.08,
       ty: randn() * SPREAD * 0.42,
     }));
-    const pts2 = Array.from({length: N}, () => ({
+    const pts2 = runSigRegAnim.pts2 ??= Array.from({length: N}, () => ({
       sx: randn() * 5, sy: randn() * 5,
       tx: randn() * SPREAD * 0.42 + SPREAD * 0.08,
       ty: randn() * SPREAD * 0.42,
     }));
 
-    const HOLD = 800;        // ms collapsed before spreading
-    const SPREAD_DUR = 2200; // ms to spread
-    const PROJ_DELAY = HOLD + SPREAD_DUR + 300;
-    let startTime = null;
+    const HOLD = 2400;        // ms collapsed before spreading
+    const SPREAD_DUR = 6600; // ms to spread
+    const PROJ_DELAY = HOLD + SPREAD_DUR + 1200;
     let projAngle = 0;
 
     function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
@@ -1288,11 +1544,14 @@
       return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
     }
 
-    function frame(ts) {
-      if (!startTime) startTime = ts;
-      const el = ts - startTime;
+    function frame(timestamp) {
+      if (!document.getElementById('s-sigreg').classList.contains('active')) return;
+      if (startTime === null) startTime = timestamp;
+      const el = (timestamp - startTime) % 24000;
 
       const isLight = document.documentElement.classList.contains('light');
+      const gold = isLight ? '128,91,19' : '212,168,83';
+      const purple = isLight ? '90,79,176' : '164,148,235';
       const bg   = isLight ? '#f5f4f0' : '#0a0a0a';
       const ring = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.04)';
       const axis = isLight ? 'rgba(0,0,0,0.1)'  : 'rgba(255,255,255,0.08)';
@@ -1323,12 +1582,12 @@
       // Projection line (appears after spreading)
       if (el > PROJ_DELAY) {
         const pAlpha = Math.min(1, (el - PROJ_DELAY) / 600);
-        projAngle += 0.006;
+        projAngle = Math.max(0, el - PROJ_DELAY) * 0.00012;
         const px = Math.cos(projAngle), py = Math.sin(projAngle);
         const len = Math.max(W, H);
         ctx.save();
         ctx.setLineDash([5, 5]);
-        ctx.strokeStyle = `rgba(212,168,83,${pAlpha * 0.55})`;
+        ctx.strokeStyle = `rgba(${gold},${pAlpha * 0.55})`;
         ctx.lineWidth = 1.2;
         ctx.beginPath();
         ctx.moveTo(cx - px*len, cy - py*len);
@@ -1349,8 +1608,8 @@
           ctx.beginPath();
           ctx.arc(ox, oy, 2, 0, Math.PI*2);
           ctx.fillStyle = p.col === 0
-            ? `rgba(212,168,83,${pAlpha * 0.7})`
-            : `rgba(124,111,205,${pAlpha * 0.7})`;
+            ? `rgba(${gold},${pAlpha * 0.7})`
+            : `rgba(${purple},${pAlpha * 0.7})`;
           ctx.fill();
         });
       }
@@ -1366,8 +1625,8 @@
           ctx.fill();
         });
       };
-      drawPts(pts1, 'rgba(212,168,83,0.88)');
-      drawPts(pts2, 'rgba(124,111,205,0.88)');
+      drawPts(pts1, `rgba(${gold},1)`);
+      drawPts(pts2, `rgba(${purple},1)`);
 
       // Label
       const lbl = document.getElementById('sigreg-anim-label');
@@ -1380,13 +1639,14 @@
 
       // Legend
       ctx.font = `${Math.round(W * 0.032)}px "JetBrains Mono", monospace`;
-      ctx.fillStyle = 'rgba(212,168,83,0.8)'; ctx.fillText('● z_t', 12, H - 22);
-      ctx.fillStyle = 'rgba(124,111,205,0.8)'; ctx.fillText('● z_{t+1}', 12, H - 8);
+      ctx.fillStyle = `rgba(${gold},1)`; ctx.fillText('● z_t', 12, H - 22);
+      ctx.fillStyle = `rgba(${purple},1)`; ctx.fillText('● z_{t+1}', 12, H - 8);
+      sigregFrame = requestAnimationFrame(frame);
 
-      activeRafs.push(requestAnimationFrame(frame));
+
     }
 
-    activeRafs.push(requestAnimationFrame(frame));
+    sigregFrame = requestAnimationFrame(frame);
   }
 
   // ── Generic helpers ───────────────────────────────────────────────
@@ -1400,24 +1660,6 @@
     const el = document.getElementById(id);
     if (el) el.textContent = text;
   }
-  function badge(id, on) {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle('visible', on);
-  }
-
-  // Lights up a set of node/arrow IDs as forward (amber) or backward (purple)
-  // mode: 'fwd' | 'bwd' | 'stop'
-  function pulse(ids, mode) {
-    const activeClass = mode === 'bwd' ? 'grad-node' : mode === 'stop' ? 'stop-node' : 'active-node';
-    ids.forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.classList.add('lit');
-      el.classList.add(activeClass);
-      setTimeout(() => el.classList.remove(activeClass), 650);
-    });
-  }
-
   // Reset all anode/aarrow/loss-pill inside a slide to dim
   function clearSlide(slideId) {
     const slide = document.getElementById(slideId);
@@ -1429,181 +1671,490 @@
         el.classList.remove('visible','fwd','bwd','stop');
         if (el.classList.contains('anim-pass-label')) el.textContent = '—';
       }));
-    // special: grad arrow for e2e
-    const ga = document.getElementById('e2e-grad-arrow');
-    if (ga) { ga.style.opacity = '0.08'; ga.style.color = ''; }
+
   }
 
-  // ── LEWM animation (slide s3) — plays once, stays lit ─────────────
+  // ── LeWM walkthrough steps ─────────────────────────────────────
   const LEWM_FWD = [
-    ['an-ot','an-ot1'],
-    ['an-vit1','an-vit2','aa-1','aa-6'],
-    ['an-zt','an-zt1','aa-2','aa-7'],
-    ['an-at','aa-4'],
-    ['an-trans','aa-3'],
-    ['an-guess','aa-5','lp-mse'],
-    ['lp-sig'],
+    [['an-ot','an-ot1'], 'Start with the current and next observations'],
+    [['aa-1','aa-6','an-vit1','an-vit2'], 'Encode both observations with shared ViT weights'],
+    [['aa-2','aa-7','an-zt','an-zt1'], 'Represent observations as latent states zₜ and zₜ₊₁'],
+    [['an-at','aa-4','aa-3','an-trans'], 'Condition the Transformer on the current latent and action'],
+    [['aa-5','an-guess'], 'Predict the next latent state ẑₜ₊₁'],
+    [['aa-pred-loss','aa-target-loss','lp-mse'], 'Compare the predicted and actual next latent states'],
+    [['aa-sig-current','aa-sig-target','lp-sig'], 'Regularize the latent representations with SIGReg'],
+  ];
+  const LEWM_BWD = [
+    [['lp-mse','lp-sig'], 'Compute gradients from the prediction and regularization losses'],
+    [['aa-pred-loss','aa-target-loss','aa-sig-current','aa-sig-target','an-guess','an-zt1'], 'Propagate the loss signals back through the latent graph'],
+    [['aa-5','an-trans'], 'Update the action-conditioned Transformer'],
+    [['aa-3','an-zt'], 'Return gradients to the current latent representation'],
+    [['aa-2','aa-7','an-vit1','an-vit2'], 'Update shared encoder weights to improve the representations'],
   ];
 
-  function runLeWMAnim() {
-    clearSlide('s3');
-    const S = 680, P = 1000;
-    const lbl = document.getElementById('lewm-pass-label');
-    if (lbl) { lbl.innerHTML = '▶&nbsp;&nbsp;forward pass'; lbl.className = 'anim-pass-label fwd'; }
-    LEWM_FWD.forEach((ids, i) => sched(() => pulse(ids, 'fwd'), i * S));
-    const bwdStart = LEWM_FWD.length * S + P;
-    sched(() => {
-      if (lbl) { lbl.innerHTML = '∇&nbsp;&nbsp;backward &nbsp;(gradient)'; lbl.className = 'anim-pass-label bwd'; }
-    }, bwdStart);
-    [...LEWM_FWD].reverse().forEach((ids, i) =>
-      sched(() => pulse(ids, 'bwd'), bwdStart + 150 + i * S));
-    // final state — leave label as ∇, everything stays lit
-    sched(() => {
-      if (lbl) { lbl.innerHTML = '∇&nbsp;&nbsp;gradient complete'; lbl.className = 'anim-pass-label bwd'; }
-    }, bwdStart + 150 + LEWM_FWD.length * S);
+  const FLOW_CYCLES = {
+  "s7": {
+    "prefix": "sg",
+    "fwd": [
+      [
+        [
+          "ot",
+          "ot1",
+          "sensor"
+        ],
+        "Read observations and current sensor state"
+      ],
+      [
+        [
+          "a1",
+          "a6",
+          "vit1",
+          "vit2"
+        ],
+        "Encode current and next observations with shared ViT weights"
+      ],
+      [
+        [
+          "a2",
+          "a7",
+          "zt",
+          "zt1"
+        ],
+        "Form the current and target latent representations"
+      ],
+      [
+        [
+          "a3",
+          "condition",
+          "pred"
+        ],
+        "Condition the predictor on visual latents and sensor data"
+      ],
+      [
+        [
+          "a4",
+          "zhat"
+        ],
+        "Predict the next latent state"
+      ],
+      [
+        [
+          "a5",
+          "mlp"
+        ],
+        "Decode the predicted latent with the physics probe"
+      ],
+      [
+        [
+          "a8",
+          "phys"
+        ],
+        "Apply differentiable physics to obtain physical predictions"
+      ],
+      [
+        [
+          "physics-loss",
+          "loss",
+          "pred-loss",
+          "target-loss",
+          "loss2"
+        ],
+        "Compare physical and latent predictions with their targets"
+      ]
+    ],
+    "bwd": [
+      [
+        [
+          "loss"
+        ],
+        "Start with the physics supervision loss"
+      ],
+      [
+        [
+          "physics-loss",
+          "phys"
+        ],
+        "Differentiate through the physical equations"
+      ],
+      [
+        [
+          "a8",
+          "mlp"
+        ],
+        "Update the physics probe"
+      ],
+      [
+        [
+          "mlp"
+        ],
+        "The frozen LeWM backbone receives no gradient"
+      ]
+    ],
+    "finish": "Gradient stops at the boundary · only the physics probe trains",
+    "stop": [
+      "a5"
+    ]
+  },
+  "s8": {
+    "prefix": "e2e",
+    "fwd": [
+      [
+        [
+          "ot",
+          "ot1",
+          "sensor"
+        ],
+        "Read observations and current sensor state"
+      ],
+      [
+        [
+          "a1",
+          "a6",
+          "vit1",
+          "vit2"
+        ],
+        "Encode current and next observations with shared ViT weights"
+      ],
+      [
+        [
+          "a2",
+          "a7",
+          "zt",
+          "zt1"
+        ],
+        "Form the current and target latent representations"
+      ],
+      [
+        [
+          "a3",
+          "condition",
+          "pred"
+        ],
+        "Condition the predictor on visual latents and sensor data"
+      ],
+      [
+        [
+          "a4",
+          "zhat"
+        ],
+        "Predict the next latent state"
+      ],
+      [
+        [
+          "a5",
+          "mlp"
+        ],
+        "Decode the predicted latent with the physics probe"
+      ],
+      [
+        [
+          "a8",
+          "phys"
+        ],
+        "Apply differentiable physics to obtain physical predictions"
+      ],
+      [
+        [
+          "physics-loss",
+          "loss",
+          "pred-loss",
+          "target-loss",
+          "loss2"
+        ],
+        "Compare physical and latent predictions with their targets"
+      ]
+    ],
+    "bwd": [
+      [
+        [
+          "loss"
+        ],
+        "Start with the physics supervision loss"
+      ],
+      [
+        [
+          "physics-loss",
+          "phys"
+        ],
+        "Differentiate through the physical equations"
+      ],
+      [
+        [
+          "a8",
+          "mlp"
+        ],
+        "Update the physics probe"
+      ],
+      [
+        [
+          "a5",
+          "zhat",
+          "loss2"
+        ],
+        "Pass physics gradients into LeWM and include latent prediction loss"
+      ],
+      [
+        [
+          "a4",
+          "pred",
+          "pred-loss"
+        ],
+        "Update the latent predictor"
+      ],
+      [
+        [
+          "condition",
+          "zt",
+          "target-loss",
+          "zt1"
+        ],
+        "Return the training signals to the latent representations"
+      ],
+      [
+        [
+          "a2",
+          "a7",
+          "vit1",
+          "vit2"
+        ],
+        "Update the shared visual encoder"
+      ]
+    ],
+    "finish": "Training step complete · physics supervision shapes the latent space",
+    "stop": []
+  },
+  "s-grounding": {
+    "prefix": "gr",
+    "fwd": [
+      [
+        [
+          "lewm"
+        ],
+        "Reuse the trained LeWM backbone"
+      ],
+      [
+        [
+          "a0",
+          "z"
+        ],
+        "Extract general latent representations"
+      ],
+      [
+        [
+          "a1",
+          "probe"
+        ],
+        "Adapt the physics probe for the target setup"
+      ],
+      [
+        [
+          "a-out",
+          "a",
+          "robot-a"
+        ],
+        "Ground the representation in arm and manipulation kinematics"
+      ],
+      [
+        [
+          "b",
+          "robot-b"
+        ],
+        "Adapt to wearable and hand tracking"
+      ],
+      [
+        [
+          "c",
+          "robot-c"
+        ],
+        "Adapt to mobile and whole-body kinematics"
+      ],
+      [
+        [
+          "b1",
+          "b2",
+          "b3"
+        ],
+        "Reuse representations while adapting the probe per robot"
+      ]
+    ],
+    "bwd": [
+      [
+        [
+          "robot-a",
+          "robot-b",
+          "robot-c"
+        ],
+        "Each robot supplies its own physical supervision"
+      ],
+      [
+        [
+          "a",
+          "b",
+          "c",
+          "a-out",
+          "probe"
+        ],
+        "Return physical training signals to the adaptable probe"
+      ]
+    ],
+    "finish": "Adaptation complete · the shared backbone stays frozen",
+    "stop": []
+  },
+  "s5": {
+    "prefix": "mot",
+    "fwd": [
+      [
+        [
+          "obs"
+        ],
+        "Start from the same observation in both cases"
+      ],
+      [
+        [
+          "a1",
+          "vit",
+          "a2",
+          "z"
+        ],
+        "The shared encoder produces the same current latent"
+      ],
+      [
+        [
+          "forward",
+          "backward"
+        ],
+        "Choose two opposing actions"
+      ],
+      [
+        [
+          "a3",
+          "a4",
+          "act-a",
+          "act-b",
+          "pred-a",
+          "pred-b"
+        ],
+        "Condition the Transformer on each action"
+      ],
+      [
+        [
+          "out1",
+          "out2",
+          "out-a",
+          "out-b"
+        ],
+        "The predictions should differ — SIGReg alone does not guarantee action sensitivity"
+      ]
+    ],
+    "bwd": [],
+    "finish": "Different actions should produce different futures",
+    "stop": []
+  },
+  "s4": {
+    "prefix": "obj",
+    "fwd": [
+      [
+        [
+          "prediction"
+        ],
+        "Measure how accurately the next latent was predicted"
+      ],
+      [
+        [
+          "regularizer"
+        ],
+        "Evaluate normality across batches of both latent states"
+      ],
+      [
+        [
+          "a2",
+          "weight"
+        ],
+        "Scale the regularization terms by λ/2"
+      ],
+      [
+        [
+          "a1",
+          "a3",
+          "total"
+        ],
+        "Add prediction error and regularization to form the objective"
+      ]
+    ],
+    "bwd": [],
+    "finish": "Optimize the combined objective",
+    "stop": []
+  }
+};
+
+  // Each diagram holds its current step until the presenter advances it.
+  const stepPositions = new Map();
+  const WALKTHROUGHS = {};
+  function makeSteps(config, qualify = id => config.prefix + '-' + id) {
+    const phases = [
+      ...config.fwd.map(([ids, caption]) => ({ ids: ids.map(qualify), caption, mode: 'fwd' })),
+      ...config.bwd.map(([ids, caption]) => ({ ids: ids.map(qualify), caption, mode: 'bwd' })),
+    ];
+    phases.push({ ids: config.stop.map(qualify), caption: config.finish, mode: config.stop.length ? 'stop' : 'done' });
+    return { prefix: config.prefix, phases };
+  }
+  WALKTHROUGHS.s3 = makeSteps({
+    prefix: 'lewm', fwd: LEWM_FWD, bwd: LEWM_BWD, stop: [],
+    finish: 'Training step complete · R to restart, → to continue',
+  }, id => id);
+  Object.entries(FLOW_CYCLES).forEach(([id, config]) => WALKTHROUGHS[id] = makeSteps(config));
+
+  function renderStep() {
+    const slide = slides[cur];
+    const walkthrough = WALKTHROUGHS[slide.id];
+    if (!walkthrough) return;
+    const position = stepPositions.get(slide.id) ?? 0;
+    clearSlide(slide.id);
+    // Keep previously visited paths visible, including after stepping backward.
+    walkthrough.phases.slice(0, position + 1).forEach(phase => phase.ids.forEach(id =>
+      document.getElementById(id).classList.add('lit')));
+    const phase = walkthrough.phases[position];
+    const cls = { fwd: 'active-node', bwd: 'grad-node', stop: 'stop-node' }[phase.mode];
+    if (cls) phase.ids.forEach(id => document.getElementById(id).classList.add(cls));
+    setCaption(walkthrough.prefix + '-caption', phase.caption);
+    const name = { fwd: 'Forward', bwd: 'Backward', stop: 'Gradient blocked', done: 'Complete' }[phase.mode];
+    setLabel(walkthrough.prefix + '-pass-label',
+      `${name} · step ${position + 1}/${walkthrough.phases.length} · ← / →`, phase.mode === 'done' ? '' : phase.mode);
   }
 
-  // ── Stop Gradient animation (slide s7) — plays once, stays lit ────
-  const SG_FWD = [
-    ['sg-ot','sg-ot1'],
-    ['sg-vit1','sg-vit2','sg-a1','sg-a6'],
-    ['sg-zt','sg-zt1','sg-a2','sg-a7'],
-    ['sg-sensor','sg-a3'],
-    ['sg-pred','sg-a4'],
-    ['sg-zhat'],
-    ['sg-mlp','sg-a5'],
-    ['sg-phys','sg-a8'],
-    ['sg-ot1gt','sg-a9','sg-loss','sg-loss2'],
-  ];
-  const SG_BWD = [
-    ['sg-loss','sg-loss2'],
-    ['sg-phys'],
-    ['sg-mlp'],
-    ['sg-zhat'],
-  ];
-
-  function runStopGradAnim() {
-    clearSlide('s7');
-    badge('sg-frozen', false); badge('sg-stop', false);
-    const S = 580, P = 900;
-    setLabel('sg-pass-label', '▶\u00A0\u00A0forward pass', 'fwd');
-    setCaption('sg-caption', 'Forward pass through frozen LeWM → physics probe');
-    SG_FWD.forEach((ids, i) => sched(() => pulse(ids, 'fwd'), i * S));
-    const bwdStart = SG_FWD.length * S + P;
-    sched(() => {
-      setLabel('sg-pass-label', '∇\u00A0\u00A0backward  (gradient)', 'bwd');
-      setCaption('sg-caption', 'Gradient flows back through probe — stops at LeWM boundary');
-    }, bwdStart);
-    SG_BWD.forEach((ids, i) => sched(() => pulse(ids, 'bwd'), bwdStart + 150 + i * S));
-    // final: show stop badges, leave lit
-    sched(() => {
-      badge('sg-stop', true); badge('sg-frozen', true);
-      setLabel('sg-pass-label', '∇\u00A0\u00A0gradient blocked', 'stop');
-      setCaption('sg-caption', 'LeWM is frozen — probe trains independently on kinematics loss');
-    }, bwdStart + 150 + SG_BWD.length * S);
+  function advanceStep(direction) {
+    const id = slides[cur].id;
+    const walkthrough = WALKTHROUGHS[id];
+    if (walkthrough) {
+      const next = (stepPositions.get(id) ?? 0) + direction;
+      if (next >= 0 && next < walkthrough.phases.length) {
+        stepPositions.set(id, next);
+        renderStep();
+        return;
+      }
+    }
+    go(cur + direction);
   }
 
-  // ── End-to-End animation (slide s8) — plays once, stays lit ───────
-  const E2E_FWD = [
-    ['e2e-ot','e2e-ot1'],
-    ['e2e-vit1','e2e-vit2','e2e-a1','e2e-a6'],
-    ['e2e-zt','e2e-zt1','e2e-a2','e2e-a7'],
-    ['e2e-sensor','e2e-a3'],
-    ['e2e-pred','e2e-a4'],
-    ['e2e-zhat'],
-    ['e2e-mlp','e2e-a5'],
-    ['e2e-phys','e2e-a8'],
-    ['e2e-ot1gt','e2e-a9','e2e-loss','e2e-loss2'],
-  ];
-  const E2E_BWD = [
-    ['e2e-loss','e2e-loss2'],
-    ['e2e-phys'],
-    ['e2e-mlp'],
-    ['e2e-zhat'],
-    ['e2e-pred','e2e-a4'],
-    ['e2e-zt','e2e-sensor'],
-    ['e2e-vit1','e2e-vit2'],
-    ['e2e-ot','e2e-ot1'],
-  ];
-
-  function runE2EAnim() {
-    clearSlide('s8');
-    const S = 540, P = 900;
-    setLabel('e2e-pass-label', '▶\u00A0\u00A0forward pass', 'fwd');
-    setCaption('e2e-caption', 'Forward pass through LeWM and physics probe');
-    E2E_FWD.forEach((ids, i) => sched(() => pulse(ids, 'fwd'), i * S));
-    const bwdStart = E2E_FWD.length * S + P;
-    sched(() => {
-      setLabel('e2e-pass-label', '∇\u00A0\u00A0backward  (gradient)', 'bwd');
-      setCaption('e2e-caption', 'Gradient from physics probe flows all the way back into LeWM');
-      const ga = document.getElementById('e2e-grad-arrow');
-      if (ga) { ga.style.opacity = '1'; ga.style.color = 'var(--accent2)'; }
-    }, bwdStart);
-    E2E_BWD.forEach((ids, i) => sched(() => pulse(ids, 'bwd'), bwdStart + 150 + i * S));
-    // final state
-    sched(() => {
-      setLabel('e2e-pass-label', '∇\u00A0\u00A0gradient complete', 'bwd');
-      setCaption('e2e-caption', 'Physics probe shapes LeWM latents to be action-sensitive and physically grounded');
-    }, bwdStart + 150 + E2E_BWD.length * S);
-  }
-
-  // ── Grounding animation (slide s-grounding) — plays once, stays lit
-  const GR_FWD = [
-    ['gr-lewm'],
-    ['gr-z'],
-    ['gr-probe','gr-a0'],
-    ['gr-big','gr-a-out'],
-    ['gr-robot-a'],
-    ['gr-robot-b'],
-    ['gr-robot-c'],
-    ['gr-b1','gr-b2','gr-b3'],
-  ];
-  const GR_BWD = [
-    ['gr-robot-a','gr-robot-b','gr-robot-c'],
-    ['gr-big'],
-    ['gr-probe','gr-a-out'],
-    ['gr-lewm','gr-z','gr-a0'],
-  ];
-
-  function runGroundingAnim() {
-    clearSlide('s-grounding');
-    const S = 620, P = 1000;
-    setLabel('gr-pass-label', '▶\u00A0\u00A0forward  →  latents to grounding', 'fwd');
-    setCaption('gr-caption', 'LeWM learns general latents once — physics probe adapts them per robot');
-    GR_FWD.forEach((ids, i) => sched(() => pulse(ids, 'fwd'), i * S));
-    const bwdStart = GR_FWD.length * S + P;
-    sched(() => {
-      setLabel('gr-pass-label', '∇\u00A0\u00A0gradient  ←  probe trains per robot', 'bwd');
-      setCaption('gr-caption', 'Only retrain the probe — LeWM backbone transfers across all robotic setups');
-    }, bwdStart);
-    GR_BWD.forEach((ids, i) => sched(() => pulse(ids, 'bwd'), bwdStart + 150 + i * S));
-    // final state
-    sched(() => {
-      setLabel('gr-pass-label', '∇\u00A0\u00A0gradient complete', 'bwd');
-      setCaption('gr-caption', 'Same backbone, different physics probes — fast transfer to any robotic setup');
-    }, bwdStart + 150 + GR_BWD.length * S);
-  }
-
-  // ── Animated slide registry ───────────────────────────────────────
-  const ANIM = {
-    's3':          runLeWMAnim,
-    's-sigreg':    runSigRegAnim,
-    's7':          runStopGradAnim,
-    's8':          runE2EAnim,
-    's-grounding': runGroundingAnim,
-  };
-
-  // ── Navigation ────────────────────────────────────────────────────
   function go(to) {
-    if (to < 0 || to >= total) return;
-    clearAllTimers();
-    clearSlide(slides[cur].id);
-    slides[cur].classList.remove('active');
-    slides[cur].classList.add('exit-up');
-    setTimeout(() => slides[cur].classList.remove('exit-up'), 450);
+    if (to < 0 || to >= total || to === cur) return;
+    // Clear transition state synchronously: rapid navigation cannot leave a
+    // returned slide hidden behind a stale exit-up class or delayed callback.
+    if (sigregFrame !== null) {
+      cancelAnimationFrame(sigregFrame);
+      sigregFrame = null;
+    }
+    const episodeVideo = document.getElementById('lewm-episode-video');
+    episodeVideo.pause();
+    slides.forEach(slide => slide.classList.remove('active', 'exit-up'));
     cur = to;
     slides[cur].classList.add('active');
-    if (ANIM[slides[cur].id]) ANIM[slides[cur].id]();
+    if (slides[cur].id === 's-sigreg') runSigRegAnim();
+    if (slides[cur].id === 's-lewm-demo') {
+      episodeVideo.currentTime = 0;
+      episodeVideo.play().catch(() => { /* Native controls remain available if autoplay is blocked. */ });
+    }
+    renderStep();
     progressEl.style.width = ((cur + 1) / total * 100) + '%';
     counterEl.textContent = String(cur + 1).padStart(2,'0') + ' / ' + String(total).padStart(2,'0');
   }
@@ -1611,16 +2162,29 @@
   document.getElementById('btn-next').addEventListener('click', () => go(cur + 1));
   document.getElementById('btn-prev').addEventListener('click', () => go(cur - 1));
   document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
-    if (e.key === 'ArrowLeft')                   { e.preventDefault(); go(cur - 1); }
+    if (e.altKey || e.ctrlKey || e.metaKey || e.target?.closest('input, textarea, select, video, [contenteditable="true"]')) return;
+    if (e.target?.closest('button') && (e.key === ' ' || e.key === 'Enter')) return;
+    if (!['ArrowRight','ArrowLeft',' ','PageDown','PageUp','r','R'].includes(e.key)) return;
+    e.preventDefault();
+    if (e.repeat) return;
+    if (e.key === 'r' || e.key === 'R') {
+      stepPositions.set(slides[cur].id, 0);
+      renderStep();
+    } else if (e.key === 'PageDown' || e.key === 'PageUp' || e.shiftKey) {
+      go(cur + (e.key === 'ArrowLeft' || e.key === 'PageUp' ? -1 : 1));
+    } else {
+      advanceStep(e.key === 'ArrowLeft' ? -1 : 1);
+    }
   });
 
   document.getElementById('theme-toggle').addEventListener('click', () => {
     const isLight = document.documentElement.classList.toggle('light');
     document.getElementById('theme-toggle').textContent = isLight ? '◐' : '◑';
+    renderStep();
   });
 
   progressEl.style.width = (1 / total * 100) + '%';
+  counterEl.textContent = '01 / ' + String(total).padStart(2, '0');
 </script>
 </body>
 </html>
